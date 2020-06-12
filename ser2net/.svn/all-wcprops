@@ -1,0 +1,167 @@
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/daqsvn/!svn/ver/72/trunk/ser2net
+END
+devcfg.c
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/devcfg.c
+END
+dataxfer.c
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/dataxfer.c
+END
+telnet.h
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/telnet.h
+END
+utils.c
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/utils.c
+END
+readconfig.c
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/readconfig.c
+END
+devcfg.h
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/devcfg.h
+END
+dataxfer.h
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/dataxfer.h
+END
+ser2net.init
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/ser2net.init
+END
+AUTHORS
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/daqsvn/!svn/ver/71/trunk/ser2net/AUTHORS
+END
+utils.h
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/utils.h
+END
+readconfig.h
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/readconfig.h
+END
+ChangeLog
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/ChangeLog
+END
+ser2net.8
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/ser2net.8
+END
+ser2net.man
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/ser2net.man
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/README
+END
+selector.c
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/selector.c
+END
+ser2net.c
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/ser2net.c
+END
+controller.c
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/controller.c
+END
+INSTALL
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/daqsvn/!svn/ver/71/trunk/ser2net/INSTALL
+END
+selector.h
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/selector.h
+END
+ser2net.conf
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/ser2net.conf
+END
+COPYING
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/daqsvn/!svn/ver/71/trunk/ser2net/COPYING
+END
+controller.h
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/daqsvn/!svn/ver/71/trunk/ser2net/controller.h
+END
+usbFindSerial.c
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/usbFindSerial.c
+END
+NEWS
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/NEWS
+END
+telnet.c
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/telnet.c
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/daqsvn/!svn/ver/72/trunk/ser2net/Makefile
+END

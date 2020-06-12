@@ -1,0 +1,65 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+*.pdf
+*.gif
+
+# Root Files #
+######################
+**/*.root
+*.root
+**/tmp_*.*
+
+# SVN Files #
+######################
+*/*/.svn/*
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# oldDirectories #
+######################
+midas_aug2013
+midas_sept2013
+midas_old
+root-5.34.07
+**/rootana/libAnalyzer/tmp_conv_1421270603/*.root
+**/rootana/libAnalyzer/tmp_conv_1421370658/*.root
+**/rootana/libAnalyzer/tmp_conv_1421389484/*.root
+**/rootana/libAnalyzer/tmp_conv_1422042879/*.root
+**/rootana/libAnalyzer/tmp_conv_1422068597/*.root
+**/rootana/libAnalyzer/tmp_conv_1501013071/*.root
+**/rootana/libAnalyzer/tmp_conv_1501015326/*.root
+**/rootana/libAnalyzer/tmp_conv_1501015453/*.root
+**/rootana/examples/*.root

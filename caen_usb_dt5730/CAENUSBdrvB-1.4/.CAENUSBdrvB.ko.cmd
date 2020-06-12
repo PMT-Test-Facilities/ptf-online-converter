@@ -1,0 +1,1 @@
+cmd_/home1/midptf/packages/caen_usb_dt5730/CAENUSBdrvB-1.4/CAENUSBdrvB.ko := cp /home1/midptf/packages/caen_usb_dt5730/CAENUSBdrvB-1.4/CAENUSBdrvB.ko.unsigned /home1/midptf/packages/caen_usb_dt5730/CAENUSBdrvB-1.4/CAENUSBdrvB.ko

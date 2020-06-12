@@ -1,0 +1,233 @@
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/daqsvn/!svn/ver/215/trunk/vme
+END
+UnpackVF48.h
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/119/trunk/vme/UnpackVF48.h
+END
+UnpackVF48A.h
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/daqsvn/!svn/ver/197/trunk/vme/UnpackVF48A.h
+END
+test_a32.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/daqsvn/!svn/ver/3/trunk/vme/test_a32.cxx
+END
+test_vme.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/163/trunk/vme/test_vme.cxx
+END
+test_vf48.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/daqsvn/!svn/ver/192/trunk/vme/test_vf48.cxx
+END
+test_v1729.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/3/trunk/vme/test_v1729.cxx
+END
+test_VMENIMIO32.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/daqsvn/!svn/ver/215/trunk/vme/test_VMENIMIO32.cxx
+END
+VMENIMIO32.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/daqsvn/!svn/ver/190/trunk/vme/VMENIMIO32.cxx
+END
+vmescan.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/daqsvn/!svn/ver/164/trunk/vme/vmescan.cxx
+END
+test_vf48_multi.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/daqsvn/!svn/ver/31/trunk/vme/test_vf48_multi.cxx
+END
+srunner_vme.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/daqsvn/!svn/ver/214/trunk/vme/srunner_vme.cxx
+END
+vmescan16.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/daqsvn/!svn/ver/3/trunk/vme/vmescan16.cxx
+END
+test_vt48.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/42/trunk/vme/test_vt48.cxx
+END
+vf48.c
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/daqsvn/!svn/ver/161/trunk/vme/vf48.c
+END
+test_vf48_analog.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/daqsvn/!svn/ver/15/trunk/vme/test_vf48_analog.cxx
+END
+vf48.h
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/daqsvn/!svn/ver/153/trunk/vme/vf48.h
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/daqsvn/!svn/ver/158/trunk/vme/Makefile
+END
+VMENIMIO32.h
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/190/trunk/vme/VMENIMIO32.h
+END
+vf48_multi.c
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/204/trunk/vme/vf48_multi.c
+END
+vt48.c
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/daqsvn/!svn/ver/164/trunk/vme/vt48.c
+END
+vf48_multi.h
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/202/trunk/vme/vf48_multi.h
+END
+test_UnpackVF48.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/daqsvn/!svn/ver/85/trunk/vme/test_UnpackVF48.cxx
+END
+UnpackVF48.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/daqsvn/!svn/ver/154/trunk/vme/UnpackVF48.cxx
+END
+test_mdi2.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/96/trunk/vme/test_mdi2.cxx
+END
+UnpackVF48A.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/daqsvn/!svn/ver/197/trunk/vme/UnpackVF48A.cxx
+END
+vt48.h
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/daqsvn/!svn/ver/42/trunk/vme/vt48.h
+END
+mdi2.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/daqsvn/!svn/ver/96/trunk/vme/mdi2.cxx
+END
+sis3820.c
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/daqsvn/!svn/ver/134/trunk/vme/sis3820.c
+END
+test_v513.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/daqsvn/!svn/ver/3/trunk/vme/test_v513.cxx
+END
+vt48_multi.c
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/128/trunk/vme/vt48_multi.c
+END
+sis3820.h
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/daqsvn/!svn/ver/134/trunk/vme/sis3820.h
+END
+vt48_multi.h
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/128/trunk/vme/vt48_multi.h
+END
+test_vf48_ana.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/daqsvn/!svn/ver/13/trunk/vme/test_vf48_ana.cxx
+END
+test_sis3320.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/daqsvn/!svn/ver/3/trunk/vme/test_sis3320.cxx
+END
+test_v792.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/daqsvn/!svn/ver/3/trunk/vme/test_v792.cxx
+END
+test_sis3820.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/daqsvn/!svn/ver/134/trunk/vme/test_sis3820.cxx
+END
+test_lrs1190.cxx
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/daqsvn/!svn/ver/3/trunk/vme/test_lrs1190.cxx
+END
+sis3820drv.h
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/daqsvn/!svn/ver/134/trunk/vme/sis3820drv.h
+END

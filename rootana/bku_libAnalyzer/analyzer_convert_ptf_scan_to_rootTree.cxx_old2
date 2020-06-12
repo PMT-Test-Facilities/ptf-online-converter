@@ -1,0 +1,301 @@
+// Simple program to print out the values from a magnetic field scan.
+
+
+#include <stdio.h>
+#include <iostream>
+
+#include "TRootanaEventLoop.hxx"
+#include "TH1D.h"
+#include "TV1190Data.hxx"
+#include "TV792Data.hxx"
+
+#include <TTree.h>
+#include <TFile.h>
+
+#define TRUE 1
+#define FALSE 0
+#define nPoints_max 1000
+#define NUM_DATA_POINTS 5
+//tree-Branch needs the size of the array as a string and adjactent string literals are concatenated 
+#define NUM_DATA_POINTS_STR "5"
+
+// Flag to indicate the gantry was not moving and to record ADC values. 
+int gbl_accept_ADC_value = FALSE;
+
+class ScanToTreeConverter: public TRootanaEventLoop {
+  
+  int nnn;
+  
+  private:
+    int counter_gant[NUM_DATA_POINTS];                                    //n-th measurement
+    int subevent[NUM_DATA_POINTS];
+    double x0_pos[NUM_DATA_POINTS], y0_pos[NUM_DATA_POINTS], z0_pos[NUM_DATA_POINTS], tilt0_pos[NUM_DATA_POINTS], rot0_pos[NUM_DATA_POINTS];  //positions of gantry0
+    double x1_pos[NUM_DATA_POINTS], y1_pos[NUM_DATA_POINTS], z1_pos[NUM_DATA_POINTS], tilt1_pos[NUM_DATA_POINTS], rot1_pos[NUM_DATA_POINTS];  //positions of gantry1
+    double tilt_phid0[NUM_DATA_POINTS], tilt_phid1[NUM_DATA_POINTS];                       //tilt position from phidget
+    int time[NUM_DATA_POINTS];
+    
+    int counter_phi[NUM_DATA_POINTS];
+    double x0_field[NUM_DATA_POINTS], y0_field[NUM_DATA_POINTS], z0_field[NUM_DATA_POINTS], tot0_field[NUM_DATA_POINTS];     //B-field from phidget0
+    double x1_field[NUM_DATA_POINTS], y1_field[NUM_DATA_POINTS], z1_field[NUM_DATA_POINTS], tot1_field[NUM_DATA_POINTS];     //B-field from phidget1
+    
+    //current and voltage of each of the 6 Helmholtz coils
+    int counter_mag[NUM_DATA_POINTS];
+  double curr_coil1[NUM_DATA_POINTS], curr_coil2[NUM_DATA_POINTS], curr_coil3[NUM_DATA_POINTS], curr_coil4[NUM_DATA_POINTS], curr_coil5[NUM_DATA_POINTS], curr_coil6[NUM_DATA_POINTS];
+  double volt_coil1[NUM_DATA_POINTS], volt_coil2[NUM_DATA_POINTS], volt_coil3[NUM_DATA_POINTS], volt_coil4[NUM_DATA_POINTS], volt_coil5[NUM_DATA_POINTS], volt_coil6[NUM_DATA_POINTS];
+    
+    //PMT readout
+    int num_points;
+    int ADC0_voltage[nPoints_max];
+    int ADC1_voltage[nPoints_max];
+    int ADC2_voltage[nPoints_max];
+    int ADC3_voltage[nPoints_max];
+    int ADC4_voltage[nPoints_max];
+    
+    //TFile *outputfile; //made by TRootAnaEventLoop with name of inputfile +.root
+    TTree *tree;
+    
+    
+  public:
+    
+    ScanToTreeConverter() {
+      nnn = 0;
+    };
+    
+    virtual ~ScanToTreeConverter() {};
+    
+    void BeginRun(int transition,int run,int time){
+      std::cout << "Custom: begin run " << run << std::endl;
+      
+      //setup ROOT branches
+      tree = new TTree("scan_tree","Scan Tree");
+      tree->Branch("num_points",&num_points,"num_points/Int_t");
+      tree->Branch("ADC0_voltage",ADC0_voltage,"ADC0_voltage[num_points]/Int_t");
+      tree->Branch("ADC1_voltage",ADC1_voltage,"ADC1_voltage[num_points]/Int_t");    
+      tree->Branch("ADC2_voltage",ADC2_voltage,"ADC2_voltage[num_points]/Int_t");
+      tree->Branch("ADC3_voltage",ADC3_voltage,"ADC3_voltage[num_points]/Int_t");    
+      tree->Branch("ADC4_voltage",ADC4_voltage,"ADC4_voltage[num_points]/Int_t");          
+      tree->Branch("time",time,"time["NUM_DATA_POINTS_STR"]/Int_t");
+      tree->Branch("gantry_event",counter_gant,"gantry_event["NUM_DATA_POINTS_STR"]/Int_t"); //an event is a measurement at a point
+      tree->Branch("gantry_subevent",subevent,"gantry_subevent["NUM_DATA_POINTS_STR"]/Int_t");
+      tree->Branch("gantry0_x",x0_pos,"gantry0_x["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("gantry0_y",y0_pos,"gantry0_y["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("gantry0_z",z0_pos,"gantry0_z["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("gantry0_tilt",tilt0_pos,"gantry0_tilt["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("gantry0_rot",rot0_pos,"gantry0_rot["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("phidg0_tilt",tilt_phid0,"phidg0_tilt["NUM_DATA_POINTS_STR"]/Double_t");
+      
+      tree->Branch("gantry1_x",x1_pos,"gantry1_x["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("gantry1_y",y1_pos,"gantry1_y["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("gantry1_z",z1_pos,"gantry1_z["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("gantry1_tilt",tilt1_pos,"gantry1_tilt["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("gantry1_rot",rot1_pos,"gantry1_rot["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("phidg1_tilt",tilt_phid1,"phidg1_tilt["NUM_DATA_POINTS_STR"]/Double_t");
+      
+      //field-related phidget measurements
+      tree->Branch("phidg_event",counter_phi,"phidg_event["NUM_DATA_POINTS_STR"]/Int_t");
+      tree->Branch("phidg0_Bx",x0_field,"phidg0_Bx["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("phidg0_By",y0_field,"phidg0_By["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("phidg0_Bz",z0_field,"phidg0_Bz["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("phidg0_Btot",tot0_field,"phidg0_Btot["NUM_DATA_POINTS_STR"]/Double_t");
+      
+      tree->Branch("phidg1_Bx",x1_field,"phidg1_Bx["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("phidg1_By",y1_field,"phidg1_By["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("phidg1_Bz",z1_field,"phidg1_Bz["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("phidg1_Btot",tot1_field,"phidg1_Btot["NUM_DATA_POINTS_STR"]/Double_t");
+      
+      //Helmholtz Coil related 
+      tree->Branch("coil_event",counter_mag,"coil_event["NUM_DATA_POINTS_STR"]/Int_t");
+      tree->Branch("I_coil1",curr_coil1,"I_coil1["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("I_coil2",curr_coil2,"I_coil2["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("I_coil3",curr_coil3,"I_coil3["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("I_coil4",curr_coil4,"I_coil4["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("I_coil5",curr_coil5,"I_coil5["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("I_coil6",curr_coil6,"I_coil6["NUM_DATA_POINTS_STR"]/Double_t");
+      
+      tree->Branch("U_coil1",volt_coil1,"U_coil1["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("U_coil2",volt_coil2,"U_coil2["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("U_coil3",volt_coil3,"U_coil3["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("U_coil4",volt_coil4,"U_coil4["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("U_coil5",volt_coil5,"U_coil5["NUM_DATA_POINTS_STR"]/Double_t");
+      tree->Branch("U_coil6",volt_coil6,"U_coil6["NUM_DATA_POINTS_STR"]/Double_t");
+      
+    }
+    
+    void EndRun(int transition,int run,int time){
+      std::cout << "Custom end run " << run <<std::endl;
+      
+      //tree->Write(): happens through in fOutputFile->Write() in base class (ProcessMidasFile)
+      
+    }
+    
+    bool ProcessMidasEvent(TDataContainer& dataContainer){
+      
+      
+      TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");
+      if(bank){
+	gbl_accept_ADC_value = TRUE;
+	return true;
+      }
+      
+      bank = dataContainer.GetEventData<TGenericData>("BONM");
+      if(bank){
+	tree->Fill();
+	num_points =0;
+	gbl_accept_ADC_value = FALSE;
+	return true;
+      }
+      if(gbl_accept_ADC_value){
+	
+	TV792Data *bank = dataContainer.GetEventData<TV792Data>("ADC0");
+	if(bank){
+	  num_points++;
+	  
+	  /// Get the Vector of ADC Measurements.
+	  std::vector<VADCMeasurement> measurements = bank->GetMeasurements();
+	  for(unsigned int i = 0; i < measurements.size(); i++){ // loop over measurements
+	    int chan = measurements[i].GetChannel();
+	    uint32_t adc = measurements[i].GetMeasurement();
+	    
+	    if(chan == 0){
+	      //std::cout<<"here"<<std::endl;
+	      ADC0_voltage[num_points-1] = adc;
+	    }
+	    else if(chan ==1){
+	      ADC1_voltage[num_points-1] = (int) adc;
+	    }  
+	    else if(chan ==2){
+	      ADC2_voltage[num_points-1] = (int) adc;         
+	    }
+	    else if(chan ==3){
+	      ADC3_voltage[num_points-1] = (int) adc;        
+	    }                    
+ 	    else if(chan ==4){
+	      ADC4_voltage[num_points-1] = (int) adc;        
+	    }                    
+
+	    
+	  }    
+	  return true;
+	}
+      }
+      
+      //Grab the banks from the MIDAS file
+      
+      for(int i = 0; i < NUM_DATA_POINTS;i++){
+	
+	
+	char name[100];
+	sprintf(name,"CYC%i",i);
+	TGenericData *bank = dataContainer.GetEventData<TGenericData>(name);
+	if(bank){ 
+	  
+	  counter_gant[i] = (int)((double*)bank->GetData64())[0];
+	  
+	  x0_pos[i] = ((double*)bank->GetData64())[1];
+	  y0_pos[i] = ((double*)bank->GetData64())[2];
+	  z0_pos[i] = ((double*)bank->GetData64())[3];
+	  tilt0_pos[i] = ((double*)bank->GetData64())[4];
+	  rot0_pos[i] = ((double*)bank->GetData64())[5];
+	  
+	  x1_pos[i] = ((double*)bank->GetData64())[6];
+	  y1_pos[i] = ((double*)bank->GetData64())[7];
+	  z1_pos[i] = ((double*)bank->GetData64())[8];
+	  tilt1_pos[i] = ((double*)bank->GetData64())[9];
+	  rot1_pos[i] = ((double*)bank->GetData64())[10];
+	  
+	  tilt_phid0[i] = ((double*)bank->GetData64())[11];
+	  tilt_phid1[i] = ((double*)bank->GetData64())[12];
+	  
+	  time[i] = (int)((double*)bank->GetData64())[13];
+	  subevent[i] = i;
+	  
+	  /* DEBUG */
+	  //std::cout << counter_gant << " " << i << " " 
+	  //<<  x0_pos[i] << " " << y0_pos[i] << " " << z0_pos[i] << " " 
+	  //<< time[i] << " " 
+	  //<< std::endl;
+	  
+	  if(counter_gant[i]%500 == 0)
+	    std::cout << "Event " << counter_gant << std::endl;
+	}
+	
+	sprintf(name,"PHI%i",i);
+	//std::cout << name << std::endl;
+	TGenericData *bank_phi = dataContainer.GetEventData<TGenericData>(name);
+	if(bank_phi){ 
+	  
+	  counter_phi[i] = (int)((double*)bank_phi->GetData64())[0];
+	  
+	  x0_field[i] = ((double*)bank_phi->GetData64())[1];
+	  y0_field[i] = ((double*)bank_phi->GetData64())[2];
+	  z0_field[i] = ((double*)bank_phi->GetData64())[3];
+	  tot0_field[i] = ((double*)bank_phi->GetData64())[4];
+	  x1_field[i] = ((double*)bank_phi->GetData64())[5];
+	  y1_field[i] = ((double*)bank_phi->GetData64())[6];
+	  z1_field[i] = ((double*)bank_phi->GetData64())[7];
+	  tot1_field[i] = ((double*)bank_phi->GetData64())[8];
+	}
+	
+	sprintf(name,"MAG%i",i);
+	//std::cout << name << std::endl;
+	TGenericData *bank_mag = dataContainer.GetEventData<TGenericData>(name);
+	if(bank_mag){ 
+	  
+	  counter_mag[i] = ((double*)bank_mag->GetData64())[0];
+
+	  //in feScan: filled from [1-32], [1-16] is current
+	  curr_coil1[i] = ((double*)bank_mag->GetData64())[9];
+	  curr_coil2[i] = ((double*)bank_mag->GetData64())[10];
+	  curr_coil3[i] = ((double*)bank_mag->GetData64())[1];
+	  curr_coil4[i] = ((double*)bank_mag->GetData64())[2];
+	  curr_coil5[i] = ((double*)bank_mag->GetData64())[3];
+	  curr_coil6[i] = ((double*)bank_mag->GetData64())[4];
+	  //[5-7]: HPD current
+	  volt_coil1[i] = ((double*)bank_mag->GetData64())[25];
+	  volt_coil2[i] = ((double*)bank_mag->GetData64())[26];
+	  volt_coil3[i] = ((double*)bank_mag->GetData64())[17];
+	  volt_coil4[i] = ((double*)bank_mag->GetData64())[18];
+	  volt_coil5[i] = ((double*)bank_mag->GetData64())[19];
+	  volt_coil6[i] = ((double*)bank_mag->GetData64())[20];
+	  //[21-23]: HPD voltage
+	}
+	//in loop over events
+      }
+            
+      return true;
+    }
+    
+    
+    // Describe some other command line argument
+    //TODO : output file name
+    void Usage(void){
+      std::cout << "\t-D option: this is a fun new option " << std::endl;
+    }
+    
+    // Define some other command line argument
+    bool CheckOption(std::string option){
+      const char* arg = option.c_str();
+      if (strncmp(arg,"-D",2)==0){
+	std::cout << arg+2 << std::endl;
+	std::cout << "I'm happy with this flag!" << std::endl;
+	return true;
+      }
+      
+      return false;
+    }
+    
+}; 
+
+
+
+
+
+
+int main(int argc, char *argv[])
+{
+  
+  ScanToTreeConverter::CreateSingleton<ScanToTreeConverter>();
+  return ScanToTreeConverter::Get().ExecuteLoop(argc, argv);
+  
+}
+

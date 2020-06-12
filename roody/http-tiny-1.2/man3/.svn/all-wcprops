@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3
+END
+http_get.3
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_get.3
+END
+http_head.3
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_head.3
+END
+http_delete.3
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_delete.3
+END
+http_port.3
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_port.3
+END
+http_proxy_port.3
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_proxy_port.3
+END
+http_lib.3
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_lib.3
+END
+http_server.3
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_server.3
+END
+http_proxy_server.3
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_proxy_server.3
+END
+http_put.3
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_put.3
+END
+http_parse_url.3
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/roody/!svn/ver/241/trunk/http-tiny-1.2/man3/http_parse_url.3
+END

@@ -1,0 +1,344 @@
+ser2net(8)                                                          ser2net(8)
+
+
+
+NNAAMMEE
+       ser2net - Serial to network proxy
+
+
+SSYYNNOOPPSSIISS
+       sseerr22nneett [-c configfile] [-C configline] [-p controlport] [-n] [-d] [-b]
+       [-v] [-P pidfile]
+
+
+DDEESSCCRRIIPPTTIIOONN
+       The sseerr22nneett daemon allows telnet and tcp  sessions  to  be  established
+       with a unit's serial ports.
+
+       The  program  comes up normally as a daemon, opens the TCP ports speci-
+       fied in the configuration file, and waits for connections.  Once a con-
+       nection  occurs, the program attempts to set up the connection and open
+       the serial port.  If another user is already using  the  connection  or
+       serial port, the connection is refused with an error message.
+
+
+OOPPTTIIOONNSS
+       _-_c _c_o_n_f_i_g_-_f_i_l_e
+              Set  the  configuration  file  to  one other than the default of
+              //eettcc//sseerr22nneett..ccoonnff
+
+       _-_C _c_o_n_f_i_g_-_l_i_n_e
+              Handle a single configuration line.  This may be specified  mul-
+              tiple times for multiple lines.  This is just like a line in the
+              config file.  This disables the default config  file,  you  must
+              specify  a  -c  after the last -C to have it read a config file,
+              too.
+
+       _-_n     Stops  the  daemon  from  forking  and  detaching  from the con-
+              trolling terminal. This is useful for running from init.
+
+       _-_d     Like -n, but also sends the system logs to standard output. This
+              is most useful for debugging purposes.
+
+       _-_P _p_i_d_f_i_l_e
+              If specified, put the process id (pid) of ser2net  in  the  pid-
+              file, replacing whatever was in that file previously.  A pidfile
+              is not created by default, you must specify this to create  one.
+              Note  also  that  this  filename  must be specific with the full
+              path, as ser2net will change directory to "/" when it becomes  a
+              daemon.  when it
+
+       _-_u     If  UUCP  locking  is enabled, this will disable the use of UUCP
+              locks.
+
+       _-_b     Cisco IOS uses a different mechanism  for  specifying  the  baud
+              rates than the mechanism described in RFC2217.  This option sets
+              the IOS version of setting  the  baud  rates.   The  default  is
+              RFC2217's.
+
+       _-_v     Prints the version of the program and exits.
+
+       _-_p _c_o_n_t_r_o_l_p_o_r_t
+              Enables  the control port and sets the TCP port to listen to for
+              the control port.  A port number may be of the form [host,]port,
+              such as 127.0.0.1,2000 or localhost,2000.  If this is specified,
+              it will only bind to the IP  address  specified  for  the  port.
+              Otherwise, it will bind to all the addresses on the machine.
+
+              If the port number is zero, that means that standard in/out will
+              be used for the only input/output, and only one port  should  be
+              specified in the config.  This way, it can be used from inetd.
+
+
+CCOONNTTRROOLL PPOORRTT
+       The  control port provides a simple interface for controlling the ports
+       and viewing their status. To accomplish this, it has the following com-
+       mands:
+
+       sshhoowwppoorrtt [[<<TTCCPP ppoorrtt>>]]
+              Show  information  about  a port. If no port is given, all ports
+              are displayed.
+
+       sshhoowwsshhoorrttppoorrtt [[<<TTCCPP ppoorrtt>>]]
+              Show information about a port, each port on one line. If no port
+              is  given,  all ports are displayed.  This can produce very wide
+              output.
+
+       hheellpp   Display a short list and summary of commands.
+
+       eexxiitt   Disconnect from the control port.
+
+       vveerrssiioonn
+              Display the version of this program.
+
+       mmoonniittoorr <<ttyyppee>> <<ttccpp ppoorrtt>>
+              Display all the input for a given port on  the  calling  control
+              port.   Only one direction may be monitored at a time.  The type
+              field may be _t_c_p or _t_e_r_m and specifies whether to  monitor  data
+              from  the  TCP port or from the serial port Note that data moni-
+              toring is best effort, if the controller port cannot keep up the
+              data  will  be  silently dropped.  A controller may only monitor
+              one thing and a port may only be monitored by one controller.
+
+       mmoonniittoorr ssttoopp
+              Stop the current monitor.
+
+       ddiissccoonnnneecctt <<ttccpp ppoorrtt>>
+              Disconnect the tcp connection on the port.
+
+       sseettppoorrttttiimmeeoouutt <<ttccpp ppoorrtt>> <<ttiimmeeoouutt>>
+              Set the amount of time in seconds  before  the  port  connection
+              will be shut down if no activity has been seen on the port.
+
+       sseettppoorrttccoonnffiigg <<ttccpp ppoorrtt>> <<ccoonnffiigg>>
+              Set the port configuration as in the device configuration in the
+              //eettcc//sseerr22nneett..ccoonnff file.  If conflicting options  are  specified,
+              the  last option will be the one used.  Note that these will not
+              change until the  port  is  disconnected  and  connected  again.
+              Options _3_0_0_, _1_2_0_0_, _2_4_0_0_, _4_8_0_0_, _9_6_0_0_, _1_9_2_0_0_, _3_8_4_0_0_, _5_7_6_0_0_, _1_1_5_2_0_0
+              set the various baud rates.  _E_V_E_N_, _O_D_D_,  _N_O_N_E  set  the  parity.
+              _1_S_T_O_P_B_I_T_,  _2_S_T_O_P_B_I_T_S  set  the  number of stop bits.  _7_D_A_T_A_B_I_T_S_,
+              _8_D_A_T_A_B_I_T_S set the number of data bits.  _[_-_]_X_O_N_X_O_F_F turns  on  (-
+              off) XON/XOFF support.  _[_-_]_R_T_S_C_T_S turns on (- off) hardware flow
+              control.  _[_-_]_L_O_C_A_L ignores (- checks) the  modem  control  lines
+              (DCD, DTR, etc.)
+
+       sseettppoorrttccoonnttrrooll <<ttccpp ppoorrtt>> <<ccoonnttrroollss>>
+              Modify dynamic port controls.  These do not stay between connec-
+              tions.  Controls are: _D_T_R_H_I_, _D_T_R_L_O Turns  on  and  off  the  DTR
+              line.  _R_T_S_H_I_, _R_T_S_L_O Turns on and off the RTS line.
+
+       sseettppoorrtteennaabbllee <<ttccpp ppoorrtt>> <<eennaabbllee ssttaattee>>
+              Sets  the  port  operation state.  Valid states are: _o_f_f to shut
+              the TCP port down, _r_a_w to enable the TCP port transfer  all  I/O
+              as-is,  _r_a_w_l_p  to  enable  the  TCP port input and device output
+              without termios setting, and _t_e_l_n_e_t to enable the TCP port is up
+              run the telnet negotiation protocol on the port.
+
+
+CCOONNFFIIGGUURRAATTIIOONN
+       Configuration  is  accomplished  through the file //eettcc//sseerr22nneett..ccoonnff.  A
+       file with another name or path may be specified using the _-_c option, or
+       individual  config  lines  may  be  specified with the _-_C option.  This
+       file consists of one or more entries with the following format:
+
+              <TCP port>:<state>:<timeout>:<device>:<options>
+
+       or
+
+              BANNER:<banner name>:<banner text>
+
+       or
+
+              TRACEFILE:<tracefile name>:<tracefile>
+
+
+
+   FFIIEELLDDSS
+       _T_C_P _p_o_r_t
+              Name  or number of the TCP/IP port to  accept  connections  from
+              for  this device.  A port number may be of the form [host,]port,
+              such as 127.0.0.1,2000 or localhost,2000.  If this is specified,
+              it  will  only  bind  to  the IP address specified for the port.
+              Otherwise, it will bind to all the ports on the machine.
+
+       _s_t_a_t_e  Either rraaww or rraawwllpp or tteellnneett or ooffff..   _o_f_f  disables  the  port
+              from  accepting connections.  It can be turned on later from the
+              control port.  _r_a_w enables the port and transfers all data as-is
+              between  the  port  and  the  long.   _r_a_w_l_p enables the port and
+              transfers all input data to device, device is open  without  any
+              termios  setting.  It allow to use /dev/lpX devices and printers
+              connected to them.  _t_e_l_n_e_t enables the port and runs the  telnet
+              protocol  on the port to set up telnet parameters.  This is most
+              useful for using telnet.
+
+       _t_i_m_e_o_u_t
+              The time (in seconds) before the port will  be  disconnected  if
+              there  is  no activity on it.  A zero value disables this funci-
+              ton.
+
+       _d_e_v_i_c_e The  name  of  the  device  to connect to. This must be  in  the
+              form of //ddeevv//<<ddeevviiccee>>.
+
+       _d_e_v_i_c_e _c_o_n_f_i_g_u_r_a_t_i_o_n _o_p_t_i_o_n_s
+              Sets  operational parameters for the serial port.  Values may be
+              separated by spaces or commas.  Options _3_0_0_, _1_2_0_0_,  _2_4_0_0_,  _4_8_0_0_,
+              _9_6_0_0_,  _1_9_2_0_0_,  _3_8_4_0_0_,  _5_7_6_0_0_, _1_1_5_2_0_0 set the various baud rates.
+              _E_V_E_N_, _O_D_D_, _N_O_N_E set the parity.   _1_S_T_O_P_B_I_T_,  _2_S_T_O_P_B_I_T_S  set  the
+              number  of  stop  bits.   _7_D_A_T_A_B_I_T_S_, _8_D_A_T_A_B_I_T_S set the number of
+              data bits.   _[_-_]_X_O_N_X_O_F_F  turns  on  (-  off)  XON/XOFF  support.
+              _[_-_]_R_T_S_C_T_S  turns  on  (-  off)  hardware flow control.  _[_-_]_L_O_C_A_L
+              ignores (- checks) the modem  control  lines  (DCD,  DTR,  etc.)
+              _[_-_]_H_A_N_G_U_P___W_H_E_N___D_O_N_E  lowers (- does not lower) the modem control
+              lines (DCD, DTR, etc.) when the connection closes.  _N_O_B_R_E_A_K dis-
+              ables automatic clearing of the break setting of the port.  _r_e_m_-
+              _c_t_l allows remote control of the serial port parameters via  RFC
+              2217.  See the README for more info.  _<_b_a_n_n_e_r _n_a_m_e_> displays the
+              given banner when a user connects to the port.
+
+              _t_r_=_<_f_i_l_e_n_a_m_e_> When the port is opened, open the given  tracefile
+              and  store  all  data  read  from  the physical device (and thus
+              written to the user's TCP port) in the file.  The  actual  file-
+              name  is  specified  in  the  TRACEFILE  directive.  If the file
+              already exists, it is appended.  The file  is  closed  when  the
+              port is closed.
+
+              _t_w_=_<_f_i_l_e_n_a_m_e_> Like tr, but traces data written to the device.
+
+              _t_b_=_<_f_i_l_e_n_a_m_e_> trace both read and written data to the same file.
+              Note that this is independent of tr and tw, so you may be  trac-
+              ing read, write, and both to different files.
+
+              _[_-_]_h_e_x_d_u_m_p  turns  on  (- turns off) hexdump output to all trace
+              files.  Each line in the trace file will be 8 (or less) bytes in
+              canonical  hex+ASCII  format.   This  is  useful  for debuging a
+              binary protocol.
+
+              _[_-_]_t_i_m_e_s_t_a_m_p adds (- removes) a timestamp to all  of  the  trace
+              files.  A  timestamp  is  prepended  to  each line if hexdump is
+              active for the trace file.  A timestamped line is also  recorded
+              in  the  trace file when a remote client connects or disconnects
+              from the port.
+
+              _[_-_]_[_t_r_-_|_t_w_-_|_t_b_-_]_h_e_x_d_u_m_p turns on (- turns  off)  hexdump  output
+              for  only  one  trace  file.   May  be combined with [-]hexdump.
+              Order is important.
+
+              _[_-_]_[_t_r_-_|_t_w_-_|_t_b_-_]_t_i_m_e_s_t_a_m_p adds (- removes) a timestamp  to  only
+              one the trace files May be combined with [-]timestamp.  Order is
+              important.
+
+
+
+       _b_a_n_n_e_r _n_a_m_e
+              A name for the banner; this may be used  in  the  options  of  a
+              port.
+
+       _b_a_n_n_e_r _t_e_x_t
+              The  text  to  display as the banner.  It takes escape sequences
+              for substituting strings, see "FILENAME AND  BANNER  FORMATTING"
+              for details.
+
+
+       _t_r_a_c_e_f_i_l_e _n_a_m_e
+              A  name  for  the  tracefile, this is used in the tw, tr, and tb
+              options of a port.
+
+       _t_r_a_c_e_f_i_l_e
+              The file to send the trace into.  Note that  this  takes  escape
+              sequences  for  substituting  strings,  see "FILENAME AND BANNER
+              FORMATTING" for details.  Note that when using the  time  escape
+              sequences,  the time is read once at port startup, so if you use
+              both tw and tr they will have the same date and time.
+
+
+       Blank lines and lines starting with '#' are ignored.
+
+
+FFIILLEENNAAMMEE AANNDD BBAANNNNEERR FFOORRMMAATTTTIINNGG
+       Filenames and banners may contain normal "C" escape sequences:
+
+         \a - bell
+         \b - backspace
+         \f - form feed
+         \n - newline
+         \r - carraige return
+         \t - tab
+         \v - vertical tab
+         \\ - \
+         \? - ?
+         \' - '
+         \" - "
+         \nnn - octal value for nnn
+         \xXX - hex value for XX
+
+       They may also contain, \d for the device name and \p for the  TCP  port
+       number.
+
+       A  banner may contain \s for the serial port parameters (eg 9600N81) of
+       the given connection.
+
+       A filename may also contain the following sequences:
+
+         \Y -> year
+         \y -> day of the year (days since Jan 1)
+         \M -> month (Jan, Feb, Mar, etc.)
+         \m -> month (as a number)
+         \A -> day of the week (Mon, Tue, etc.)
+         \D -> day of the month
+         \e -> epoc (seconds since Jan 1, 1970)
+         \U -> microseconds in the current second
+         \p -> local port number
+         \d -> local device name
+         \I -> remote IP address (in dot format)
+         \H -> hour (24-hour time)
+         \h -> hour (12-hour time)
+         \i -> minute
+         \s -> second
+         \q -> am/pm
+         \P -> AM/PM
+
+       These sequences may be used to make the filename unique  per  open  and
+       identify  which  port/device  the filename was for.  Note that in file-
+       names when using \d, everything up to  and  including  last  /  in  the
+       device  name  is removed, because you can't have a / in a filename.  So
+       in a filename /dev/ttyS0 would become just ttyS0.
+
+
+SSEECCUURRIITTYY
+       ser2net uses the tcp wrappers interface to implement  host-based  secu-
+       rity.   See  hosts_access(5)  for a description of the file setup.  Two
+       daemons are used by ser2net,  "ser2net"  is  for  the  data  ports  and
+       "ser2net-control" is for the control ports.
+
+
+SSIIGGNNAALLSS
+       SSIIGGHHUUPP
+            If ser2net receives a SIGHUP, it will reread it configuration file
+            and make the appropriate changes.  If an inuse port is changed  or
+            deleted,  the  actual change will not occur until the port is dis-
+            connected.
+
+
+EErrrroorr
+       Almost all error output goes to syslog, not standard output.
+
+
+FFIILLEESS
+       /etc/ser2net.conf
+
+
+SSEEEE AALLSSOO
+       telnet(1), hosts_access(5)
+
+
+KKNNOOWWNN PPRROOBBLLEEMMSS
+       None.
+
+
+AAUUTTHHOORR
+       Corey Minyard <minyard@acm.org>
+
+
+
+Serial to network proxy            06/02/01                         ser2net(8)

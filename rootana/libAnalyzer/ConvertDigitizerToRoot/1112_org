@@ -1,0 +1,66 @@
+{
+//========= Macro generated from object: PeakHist/PeakHist
+//========= by ROOT version5.34/07
+   
+   TH1F *PeakHist__1 = new TH1F("PeakHist__1","PeakHist",351,-50.5,300.5);
+   PeakHist__1->SetBinContent(49,2);
+   PeakHist__1->SetBinContent(50,26);
+   PeakHist__1->SetBinContent(51,193);
+   PeakHist__1->SetBinContent(52,808);
+   PeakHist__1->SetBinContent(53,3165);
+   PeakHist__1->SetBinContent(54,10249);
+   PeakHist__1->SetBinContent(55,17963);
+   PeakHist__1->SetBinContent(56,15757);
+   PeakHist__1->SetBinContent(57,8407);
+   PeakHist__1->SetBinContent(58,3355);
+   PeakHist__1->SetBinContent(59,1122);
+   PeakHist__1->SetBinContent(60,332);
+   PeakHist__1->SetBinContent(61,83);
+   PeakHist__1->SetBinContent(62,17);
+   PeakHist__1->SetBinContent(63,4);
+   PeakHist__1->SetEntries(61483);
+   PeakHist__1->SetDirectory(0);
+   
+   TF1 *gaus = new TF1("gaus","gaus",-10,10);
+   gaus->SetFillColor(19);
+   gaus->SetFillStyle(0);
+   gaus->SetLineColor(2);
+   gaus->SetLineWidth(2);
+   gaus->SetChisquare(813.598);
+   gaus->SetNDF(10);
+   gaus->GetXaxis()->SetLabelFont(42);
+   gaus->GetXaxis()->SetLabelSize(0.035);
+   gaus->GetXaxis()->SetTitleSize(0.035);
+   gaus->GetXaxis()->SetTitleFont(42);
+   gaus->GetYaxis()->SetLabelFont(42);
+   gaus->GetYaxis()->SetLabelSize(0.035);
+   gaus->GetYaxis()->SetTitleSize(0.035);
+   gaus->GetYaxis()->SetTitleFont(42);
+   gaus->SetParameter(0,17269.2);
+   gaus->SetParError(0,92.582);
+   gaus->SetParLimits(0,0,0);
+   gaus->SetParameter(1,4.45512);
+   gaus->SetParError(1,0.00580853);
+   gaus->SetParLimits(1,0,0);
+   gaus->SetParameter(2,1.40107);
+   gaus->SetParError(2,0.00490416);
+   gaus->SetParLimits(2,0,14.4751);
+   PeakHist__1->GetListOfFunctions()->Add(gaus);
+
+   Int_t ci;   // for color index setting
+   ci = TColor::GetColor("#000099");
+   PeakHist__1->SetLineColor(ci);
+   PeakHist__1->GetXaxis()->SetLabelFont(42);
+   PeakHist__1->GetXaxis()->SetLabelSize(0.035);
+   PeakHist__1->GetXaxis()->SetTitleSize(0.035);
+   PeakHist__1->GetXaxis()->SetTitleFont(42);
+   PeakHist__1->GetYaxis()->SetLabelFont(42);
+   PeakHist__1->GetYaxis()->SetLabelSize(0.035);
+   PeakHist__1->GetYaxis()->SetTitleSize(0.035);
+   PeakHist__1->GetYaxis()->SetTitleFont(42);
+   PeakHist__1->GetZaxis()->SetLabelFont(42);
+   PeakHist__1->GetZaxis()->SetLabelSize(0.035);
+   PeakHist__1->GetZaxis()->SetTitleSize(0.035);
+   PeakHist__1->GetZaxis()->SetTitleFont(42);
+   PeakHist__1->Draw("");
+}
