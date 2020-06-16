@@ -69,6 +69,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   double acc_x3[num_phidg_max], acc_y3[num_phidg_max], acc_z3[num_phidg_max];
   double acc_x4[num_phidg_max], acc_y4[num_phidg_max], acc_z4[num_phidg_max];
 
+  double int_temp, ext1_temp,ext2_temp;
 
   //current and voltage of each of the 6 Helmholtz coils
   int counter_mag;
@@ -235,6 +236,10 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("phidg4_Bz",z4_field,"phidg4_Bz[num_phidg4_points]/Double_t");
     tree->Branch("phidg4_Btot",tot4_field,"phidg4_Btot[num_phidg4_points]/Double_t");
     tree->Branch("phidg4_tilt",tilt_phid4,"phidg4_tilt[num_phidg4_points]/Double_t");
+
+    tree->Branch("int_temp",&int_temp,"int_temp/Double_t");
+    tree->Branch("ext1_temp",&ext1_temp,"ext1_temp/Double_t");
+    tree->Branch("ext2_temp",&ext2_temp,"ext2_temp/Double_t");
 
     //Helmholtz Coil related 
     tree->Branch("coil_event",&counter_mag,"coil_event/Int_t");
@@ -647,6 +652,14 @@ class ScanToTreeConverter: public TRootanaEventLoop {
         tilt_phid4[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[7];
 
         return true;
+      }
+
+      // Check for environment temperature monitoring data
+      TGenericData *envt = dataContainer.GetEventData<TGenericData>("ENVT");
+      if(envt){
+	  int_temp = ((float*)envt->GetData64())[0];
+	  ext1_temp = ((float*)envt->GetData64())[1];
+	  ext2_temp = ((float*)envt->GetData64())[2];
       }
 
       //Grab the gantry bank 
