@@ -21,7 +21,7 @@
 
 
 
-#define nPoints_max 50000
+#define nPoints_max 10000
 #define num_phidg_max 10000
 #define num_v1730_max 1000 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
 
@@ -313,15 +313,10 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   }
 
   bool ProcessMidasEvent(TDataContainer& dataContainer){
-    TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");  // END OF MOVE = START of MEASUREMENT
-    if(bank){
-      std::cout << "end " << std::endl;
-      gbl_accept_banks = TRUE;
-      return true;
-    }
-    bank = dataContainer.GetEventData<TGenericData>("BONM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
-    if(bank){
-      std::cout << "end of move" << std::endl;
+
+    // Finish this 'location', if we have too many events
+    if(num_points>=nPoints_max){
+      std::cout << "end of location" << std::endl;
       tree->Fill();
       counter = 0;
       num_points = 0;
@@ -334,7 +329,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       gbl_accept_banks = FALSE;
       return true;
     }
-    if(gbl_accept_banks){
+    if(1){
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //attempt at adding digitizer data
       //Set input parameters which correspond to ADC measurements
@@ -568,7 +563,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
             num_points++;
 
 
-            std::cout << "point# "<< num_points << std::endl;
+            //            std::cout << "point# "<< num_points << std::endl;
 
             std::vector<RawBRBMeasurement> measures = brb_b->GetMeasurements();
 

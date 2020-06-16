@@ -57,11 +57,14 @@ LIBS += $(MIDASLIBS)
 
 endif # MIDASSYS
 
-OBJS:=
+OBJS:= TTreeMaker.o TBRBRawData.o
 
-all: $(OBJS)  midas2root_ptf.exe
+all: $(OBJS)  midas2root_ptf.exe midas2root_mpmt.exe
 
 midas2root_ptf.exe: midas2root_ptf.cxx $(OBJS) 
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LIBS) $(ROOTGLIBS) -lm -lz -lpthread -lssl -lutil
+
+midas2root_mpmt.exe: midas2root_mpmt.cxx $(OBJS) 
 	$(CXX) -o $@ $(CXXFLAGS) $^ $(LIBS) $(ROOTGLIBS) -lm -lz -lpthread -lssl -lutil
 
 
