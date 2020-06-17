@@ -21,9 +21,9 @@
 
 
 
-#define nPoints_max 10000
+#define nPoints_max 1
 #define num_phidg_max 10000
-#define num_v1730_max 1000 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
+#define num_v1730_max 1024 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
 
   int counter_gant;                                    //n-th measurement
   int subevent;
@@ -68,7 +68,10 @@
 
   // V1730 waveforms
   // 9.Nov.2017 Let's try adding using channels 2,3,4, 5
-  double V1730_wave0[nPoints_max][num_v1730_max],  V1730_wave1[nPoints_max][num_v1730_max],  V1730_wave2[nPoints_max][num_v1730_max], V1730_wave3[nPoints_max][num_v1730_max], V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max];
+  double V1730_wave0[nPoints_max][num_v1730_max],  V1730_wave1[nPoints_max][num_v1730_max],  V1730_wave2[nPoints_max][num_v1730_max], V1730_wave3[nPoints_max][num_v1730_max], V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max], V1730_wave6[nPoints_max][num_v1730_max], V1730_wave7[nPoints_max][num_v1730_max];
+  double V1730_wave8[nPoints_max][num_v1730_max],  V1730_wave9[nPoints_max][num_v1730_max],  V1730_wave10[nPoints_max][num_v1730_max], V1730_wave11[nPoints_max][num_v1730_max], V1730_wave12[nPoints_max][num_v1730_max], V1730_wave13[nPoints_max][num_v1730_max], V1730_wave14[nPoints_max][num_v1730_max], V1730_wave15[nPoints_max][num_v1730_max];
+  double V1730_wave16[nPoints_max][num_v1730_max],  V1730_wave17[nPoints_max][num_v1730_max],  V1730_wave18[nPoints_max][num_v1730_max], V1730_wave19[nPoints_max][num_v1730_max], V1730_wave20[nPoints_max][num_v1730_max], V1730_wave21[nPoints_max][num_v1730_max], V1730_wave22[nPoints_max][num_v1730_max], V1730_wave23[nPoints_max][num_v1730_max];
+
 
   //PMT readout
   int start_val_stat;
@@ -187,12 +190,39 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("Window_width1",&Window_width1,"Window_width1[num_points_dig1]/Double_t");
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
-    tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points][70]/Double_t"); //think of eqn* // SIZE OF COLUMN MUST MATCH num_v1730_max OR ELSE BANDING ISSUES WILL OCCUR
-    tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][70]/Double_t"); //think of eqn*
-    tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points][70]/Double_t"); //think of eqn*
-    tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][70]/Double_t"); 
-    tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][70]/Double_t");
-    tree->Branch("V1730_wave5",&V1730_wave5,"V1730_wave5[num_points][70]/Double_t");
+    for(int i =0; i < 2; i++){  // Save 24 waveforms
+      char name[100], descr[100];
+      sprintf(name,"V1730_wave%i",i);
+      sprintf(descr,"V1730_wave%i[num_points][%i]/Double_t",i,num_v1730_max);
+
+      if(i==0) tree->Branch(name,&V1730_wave0,descr); 
+      if(i==1) tree->Branch(name,&V1730_wave1,descr); 
+      if(i==2) tree->Branch(name,&V1730_wave2,descr); 
+      if(i==3) tree->Branch(name,&V1730_wave3,descr); 
+      if(i==4) tree->Branch(name,&V1730_wave4,descr); 
+      if(i==5) tree->Branch(name,&V1730_wave5,descr); 
+      if(i==6) tree->Branch(name,&V1730_wave6,descr); 
+      if(i==7) tree->Branch(name,&V1730_wave7,descr); 
+      if(i==8) tree->Branch(name,&V1730_wave8,descr); 
+      if(i==9) tree->Branch(name,&V1730_wave9,descr); 
+      if(i==10) tree->Branch(name,&V1730_wave10,descr); 
+      if(i==11) tree->Branch(name,&V1730_wave11,descr); 
+      if(i==12) tree->Branch(name,&V1730_wave12,descr); 
+      if(i==13) tree->Branch(name,&V1730_wave13,descr); 
+      if(i==14) tree->Branch(name,&V1730_wave14,descr); 
+      if(i==15) tree->Branch(name,&V1730_wave15,descr); 
+      if(i==16) tree->Branch(name,&V1730_wave16,descr); 
+      if(i==17) tree->Branch(name,&V1730_wave17,descr); 
+      if(i==18) tree->Branch(name,&V1730_wave18,descr); 
+      if(i==19) tree->Branch(name,&V1730_wave19,descr); 
+      if(i==20) tree->Branch(name,&V1730_wave20,descr); 
+      if(i==21) tree->Branch(name,&V1730_wave21,descr); 
+      if(i==22) tree->Branch(name,&V1730_wave22,descr); 
+      if(i==23) tree->Branch(name,&V1730_wave23,descr); 
+
+    }
+
+
     //tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points]/Double_t"); //think of eqn*
     //tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points]/Double_t"); //think of eqn*
     //tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points]/Double_t"); //think of eqn*
@@ -314,21 +344,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
   bool ProcessMidasEvent(TDataContainer& dataContainer){
 
-    // Finish this 'location', if we have too many events
-    if(num_points>=nPoints_max){
-      std::cout << "end of location" << std::endl;
-      tree->Fill();
-      counter = 0;
-      num_points = 0;
-      num_points_dig0 = 0;
-      num_points_dig1 = 0;
-      num_phidg0_points = 0;
-      num_phidg1_points = 0;
-      num_phidg3_points = 0;
-      num_phidg4_points = 0;
-      gbl_accept_banks = FALSE;
-      return true;
-    }
+
     if(1){
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //attempt at adding digitizer data
@@ -582,6 +598,18 @@ class ScanToTreeConverter: public TRootanaEventLoop {
         }else{
           std::cout << "Too many points! " << num_points << std::endl;
         }
+
+        tree->Fill();
+        counter = 0;
+        num_points = 0;
+        num_points_dig0 = 0;
+        num_points_dig1 = 0;
+        num_phidg0_points = 0;
+        num_phidg1_points = 0;
+        num_phidg3_points = 0;
+        num_phidg4_points = 0;
+        gbl_accept_banks = FALSE;
+        
         return true;
       }
 
