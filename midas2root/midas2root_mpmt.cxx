@@ -27,8 +27,8 @@
 
   int counter_gant;                                    //n-th measurement
   int subevent;
-  double x0_pos, y0_pos, z0_pos, tilt0_pos, rot0_pos;  //positions of gantry0
-  double x1_pos, y1_pos, z1_pos, tilt1_pos, rot1_pos;  //positions of gantry1
+  double x0_pos =  0.46, y0_pos = 0.38, z0_pos, tilt0_pos, rot0_pos;  //positions of gantry0
+  double x1_pos =  0.46, y1_pos = 0.38, z1_pos, tilt1_pos, rot1_pos;  //positions of gantry1
   double cyctime;
 
   //TODO: add other positions (Phidget, laser, ...)
