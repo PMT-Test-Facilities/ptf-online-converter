@@ -190,7 +190,8 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("Window_width1",&Window_width1,"Window_width1[num_points_dig1]/Double_t");
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
-    for(int i =0; i < 2; i++){  // Save 24 waveforms
+    int n_channnels_to_save = 2; // only save 2 channels for now
+    for(int i =0; i < n_channnels_to_save; i++){  // Save up to 24 waveforms
       char name[100], descr[100];
       sprintf(name,"V1730_wave%i",i);
       sprintf(descr,"V1730_wave%i[num_points][%i]/Double_t",i,num_v1730_max);
