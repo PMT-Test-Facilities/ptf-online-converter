@@ -123,7 +123,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
   private:
 
- 
+  int fNChan; // number of digitizer channels to save.
 
   //TFile *outputfile; //made by TRootAnaEventLoop with name of inputfile +.root
   TTree *tree;
@@ -137,6 +137,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   ScanToTreeConverter() {
     UseBatchMode(); //necessary to switch off graphics, used in for example AnaDisplay
     nnn = 0;
+    fNChan = 2;
   };
 
   virtual ~ScanToTreeConverter() {};
@@ -190,8 +191,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("Window_width1",&Window_width1,"Window_width1[num_points_dig1]/Double_t");
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
-    int n_channnels_to_save = 2; // only save 2 channels for now
-    for(int i =0; i < n_channnels_to_save; i++){  // Save up to 24 waveforms
+    for(int i =0; i < fNChan; i++){  // Save up to 24 waveforms
       char name[100], descr[100];
       sprintf(name,"V1730_wave%i",i);
       sprintf(descr,"V1730_wave%i[num_points][%i]/Double_t",i,num_v1730_max);
@@ -752,15 +752,16 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
   // Describe some other command line argument
   void Usage(void){
-    std::cout << "\t-D option: this is a fun new option " << std::endl;
+    std::cout << "\t-nchan option: specify how many channels of digitizer to save " << std::endl;
   }
 
   // Define some other command line argument
   bool CheckOption(std::string option){
     const char* arg = option.c_str();
-    if (strncmp(arg,"-D",2)==0){
-      std::cout << arg+2 << std::endl;
-      std::cout << "I'm happy with this flag!" << std::endl;
+    if (strncmp(arg,"-nchan",2)==0){
+      fNChan = atoi(arg+6);
+      std::cout << "Number of channels to save: " << fNChan << std::endl;
+      
       return true;
     }
 
