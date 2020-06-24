@@ -310,46 +310,43 @@ class ScanToTreeConverter: public TRootanaEventLoop {
         // First scan point has been saving too many events
         if(num_points<nPoints_max){
 
-          //std::cout << "Filling V1730... " << num_points << std::endl;
-          if(bank || 1){
-            num_points++;
-
-
-            //std::cout << "point# "<< num_points << std::endl;
-
-            std::vector<RawChannelMeasurement> measurements = v1730_b->GetMeasurements();
-
-            for(int i = 0; i < measurements.size(); i++){
-
-              int chan = measurements[i].GetChannel();
-              //std::cout << "chan " << chan << std::endl;
-              if(chan < 0 || chan >5) continue; // 9.Nov.2017 updated for first 5 channels only
-              //		  std::cout << "chan " << chan << std::endl;
-
-              // saves num_v1730_max (currently 70) bins around each pulse
-              // laser pulse is given an offset as it occurs earlier in time
-              // Note: 1 ib  = 2 ns
-              // This is what writes Midas data to the ROOT tree
-
-              // Channel    Output
-              // 0          Primary PMT wave
-              // 1          Reference Wave
-              // 2          Gantry0 receiver PMT
-              // 3          Gantry0 monitor PMT
-              // 4          Gantry1 receiver PMT
-              // 5          Gantry1 monitor PMT
-
-              for(int ib = timeStart; ib < measurements[i].GetNSamples() && ib  < num_v1730_max + timeStart ; ib++){
-
-                //std::cout<<"ib = " <<ib <<std::endl;
-
-                if(chan == 0) V1730_wave0[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);  
-                if(chan == 1) V1730_wave1[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-timeStart); // -130 is the timeStart offset, meaning the reference signal window starts at the start of the digitizer readout
-                // if(chan == 2) V1730_wave2[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
-                if(chan == 3) V1730_wave3[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
-                if(chan == 5) V1730_wave5[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
-              }		  
-            }	      
+          num_points++;
+          
+          
+          //std::cout << "point# "<< num_points << std::endl;
+          
+          std::vector<RawChannelMeasurement> measurements = v1730_b->GetMeasurements();
+          
+          for(int i = 0; i < measurements.size(); i++){
+            
+            int chan = measurements[i].GetChannel();
+            //std::cout << "chan " << chan << std::endl;
+            if(chan < 0 || chan >5) continue; // 9.Nov.2017 updated for first 5 channels only
+            //		  std::cout << "chan " << chan << std::endl;
+            
+            // saves num_v1730_max (currently 70) bins around each pulse
+            // laser pulse is given an offset as it occurs earlier in time
+            // Note: 1 ib  = 2 ns
+            // This is what writes Midas data to the ROOT tree
+            
+            // Channel    Output
+            // 0          Primary PMT wave
+            // 1          Reference Wave
+            // 2          Gantry0 receiver PMT
+            // 3          Gantry0 monitor PMT
+            // 4          Gantry1 receiver PMT
+            // 5          Gantry1 monitor PMT
+            
+            for(int ib = timeStart; ib < measurements[i].GetNSamples() && ib  < num_v1730_max + timeStart ; ib++){
+              
+              //std::cout<<"ib = " <<ib <<std::endl;
+              
+              if(chan == 0) V1730_wave0[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);  
+              if(chan == 1) V1730_wave1[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-timeStart); // -130 is the timeStart offset, meaning the reference signal window starts at the start of the digitizer readout
+              // if(chan == 2) V1730_wave2[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
+              if(chan == 3) V1730_wave3[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
+              if(chan == 5) V1730_wave5[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
+            }		             	      
           }
         }
         return true;

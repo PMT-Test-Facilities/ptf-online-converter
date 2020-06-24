@@ -312,54 +312,49 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   bool ProcessMidasEvent(TDataContainer& dataContainer){
 
 
-    if(1){
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      //attempt at adding digitizer data
-      //Set input parameters which correspond to ADC measurements
-      start_val_stat = 90;
-      window_width = 45;
-      trigger = 40;
-
-      // Get BRB data
-      TBRBRawData *brb_b = dataContainer.GetEventData<TBRBRawData>("BRB0");
-
-      if(brb_b){      
-
-        if(num_points<nPoints_max){
-
-          if(1){
-            num_points++;
-
-            std::vector<RawBRBMeasurement> measures = brb_b->GetMeasurements();
-
-            for(int i = 0; i < measures.size(); i++){           
-              int chan = measures[i].GetChannel();
-              for(int ib = 0; ib < measures[i].GetNSamples(); ib++){
-                if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
-                if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
-              }              
-            }	      
-          }
-        }else{
-          std::cout << "Too many points! " << num_points << std::endl;
-        }
-
-        tree->Fill();
-        counter = 0;
-        num_points = 0;
-        num_points_dig0 = 0;
-        num_points_dig1 = 0;
-        num_phidg0_points = 0;
-        num_phidg1_points = 0;
-        num_phidg3_points = 0;
-        num_phidg4_points = 0;
-        gbl_accept_banks = FALSE;
+    //attempt at adding digitizer data
+    //Set input parameters which correspond to ADC measurements
+    start_val_stat = 90;
+    window_width = 45;
+    trigger = 40;
+    
+    // Get BRB data
+    TBRBRawData *brb_b = dataContainer.GetEventData<TBRBRawData>("BRB0");
+    
+    if(brb_b){      
+      
+      if(num_points<nPoints_max){
         
-        return true;
+        num_points++;
+        
+        std::vector<RawBRBMeasurement> measures = brb_b->GetMeasurements();
+        
+        for(int i = 0; i < measures.size(); i++){           
+          int chan = measures[i].GetChannel();
+          for(int ib = 0; ib < measures[i].GetNSamples(); ib++){
+            if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
+            if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
+          }              
+        }	      
+        
+      }else{
+        std::cout << "Too many points! " << num_points << std::endl;
       }
-
+      
+      tree->Fill();
+      counter = 0;
+      num_points = 0;
+      num_points_dig0 = 0;
+      num_points_dig1 = 0;
+      num_phidg0_points = 0;
+      num_phidg1_points = 0;
+      num_phidg3_points = 0;
+      num_phidg4_points = 0;
+      gbl_accept_banks = FALSE;
+      
+      return true;
     }
-
+    
     return true;
   }
 
