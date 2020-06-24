@@ -64,8 +64,8 @@
   double volt_receiver0, volt_receiver1, volt_monitor0, volt_monitor1;
 
   //Digitizer variables
-  double ADC0_dig[nPoints_max], ADC1_dig[nPoints_max], Start_time0[nPoints_max], Window_width0[nPoints_max], Start_time1[nPoints_max], Window_width1[nPoints_max], start_0, start_1, ADC2_dig[nPoints_max], ADC3_dig[nPoints_max], ADC4_dig[nPoints_max], ADC5_dig[nPoints_max];
-
+  double Start_time0[nPoints_max], Window_width0[nPoints_max], Start_time1[nPoints_max], Window_width1[nPoints_max], start_0, start_1;
+  
   // V1730 waveforms
   // 9.Nov.2017 Let's try adding using channels 2,3,4, 5
   double V1730_wave0[nPoints_max][num_v1730_max],  V1730_wave1[nPoints_max][num_v1730_max],  V1730_wave2[nPoints_max][num_v1730_max], V1730_wave3[nPoints_max][num_v1730_max], V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max], V1730_wave6[nPoints_max][num_v1730_max], V1730_wave7[nPoints_max][num_v1730_max];
@@ -81,19 +81,6 @@
   int num_points;
   int num_points_dig0; 
   int num_points_dig1;  
-
-
-  int ADC0_voltage[nPoints_max];
-  int ADC1_voltage[nPoints_max];
-  int ADC2_voltage[nPoints_max];
-  int ADC3_voltage[nPoints_max];
-  int ADC4_voltage[nPoints_max];
-
-  int TDC0_voltage[nPoints_max];
-  int TDC1_voltage[nPoints_max];
-  int TDC2_voltage[nPoints_max];
-  int TDC3_voltage[nPoints_max];
-  int TDC4_voltage[nPoints_max];
 
 
 
@@ -119,7 +106,6 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   TH1F *SampleWave5;
 
   TH1F *StartVal0;
-  TH1F *Merging;  
 
   private:
 
@@ -153,16 +139,6 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("num_points",&num_points,"num_points/Int_t");
     tree->Branch("num_points_dig0",&num_points_dig0,"num_points_dig0/Int_t");
     tree->Branch("num_points_dig1",&num_points_dig1,"num_points_dig1/Int_t");    
-    tree->Branch("ADC0_voltage",ADC0_voltage,"ADC0_voltage[num_points]/Int_t");
-    tree->Branch("ADC1_voltage",ADC1_voltage,"ADC1_voltage[num_points]/Int_t");    
-    tree->Branch("ADC2_voltage",ADC2_voltage,"ADC2_voltage[num_points]/Int_t");
-    tree->Branch("ADC3_voltage",ADC3_voltage,"ADC3_voltage[num_points]/Int_t");    
-    tree->Branch("ADC4_voltage",ADC4_voltage,"ADC4_voltage[num_points]/Int_t");          
-    tree->Branch("TDC0_voltage",TDC0_voltage,"TDC0_voltage[num_points]/Int_t");
-    tree->Branch("TDC1_voltage",TDC1_voltage,"TDC1_voltage[num_points]/Int_t");    
-    tree->Branch("TDC2_voltage",TDC2_voltage,"TDC2_voltage[num_points]/Int_t");
-    tree->Branch("TDC3_voltage",TDC3_voltage,"TDC3_voltage[num_points]/Int_t");    
-    tree->Branch("TDC4_voltage",TDC4_voltage,"TDC4_voltage[num_points]/Int_t");          
 
     tree->Branch("time",&cyctime,"time/Double_t");        //arbitrary offset in time, in ms, either UInt or larger, so just be safe
     tree->Branch("gantry_event",&counter_gant,"gantry_event/Int_t"); //an event is a measurement at a point
@@ -174,16 +150,6 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("gantry0_tilt",&tilt0_pos,"gantry0_tilt/Double_t");
     tree->Branch("gantry0_rot",&rot0_pos,"gantry0_rot/Double_t");
     //tree->Branch("phidg0_tilt",&tilt_phid0,"phidg0_tilt/Double_t");
-
-    //digitizer data 
-    tree->Branch("ADC0_dig",&ADC0_dig,"ADC0_dig[num_points_dig1]/Double_t"); //think of eqn*
-    tree->Branch("ADC1_dig",&ADC1_dig,"ADC1_dig[num_points_dig1]/Double_t"); //think of eqn**
-
-    //9.Nov.2017
-    tree->Branch("ADC2_dig",&ADC2_dig,"ADC2_dig[num_points_dig1]/Double_t"); //think of eqn**
-    tree->Branch("ADC3_dig",&ADC3_dig,"ADC3_dig[num_points_dig1]/Double_t"); //think of eqn**
-    tree->Branch("ADC4_dig",&ADC4_dig,"ADC4_dig[num_points_dig1]/Double_t"); // think of eqn**
-    tree->Branch("ADC5_dig",&ADC5_dig,"ADC5_dig[num_points_dig1]/Double_t"); //think of eqn**
 
     tree->Branch("Start_time0",&Start_time0,"Start_time0[num_points_dig0]/Double_t");
     tree->Branch("Start_time1",&Start_time1,"Start_time1[num_points_dig1]/Double_t");
@@ -346,406 +312,49 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   bool ProcessMidasEvent(TDataContainer& dataContainer){
 
 
-    if(1){
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      //attempt at adding digitizer data
-      //Set input parameters which correspond to ADC measurements
-      start_val_stat = 90;
-      window_width = 45;
-      trigger = 40;
-      int eventid = dataContainer.GetMidasData().GetEventId();
-      int timestamp = dataContainer.GetMidasData().GetTimeStamp();
-      TV1730RawData *v1730 = dataContainer.GetEventData<TV1730RawData>("V730");
-      if(v1730 && 0){
-        std::vector<RawChannelMeasurement> measurements = v1730->GetMeasurements();
-        for(int i = 0; i < measurements.size(); i++){
-
-          printf("%d\n", i);
-
-          num_points_dig0++;
-          num_points_dig1++;
-          int start_val = start_val_stat;
-          int chan = measurements[i].GetChannel();
-          float offset = 0;
-          std::vector<UShort_t> samples;
-          Int_t PeakTime = 0;
-          Double_t Peak = 0;
-          for(int ib = 0; ib < measurements[i].GetNSamples(); ib++) samples.push_back(measurements[i].GetSample(ib)-offset);
-
-          /* Channel outputs as of 30.Nov.2017
-           * 0: Test PMT response signal
-           * 1: Reference laser trigger
-           * 2: Gantry 0 receiver PMT
-           * 3: G0 monitor PMT
-           * 4: G1 receiver PMT
-           * 5: G1 monitor PMT
-           */
-          if(chan == 1){ 
-            Double_t Baseline = 0;
-            for(int j=185; j<245; ++j) Baseline += (Double_t) samples[j];
-            //for(int j = 0; j < 400; ++j) Baseline += (Double_t) samples[j];
-            Baseline /= 60;
-            //Baseline /= 200;
-            Double_t Charge = 0;
-            for(start_val; start_val<start_val_stat+window_width; ++start_val) Charge += (Double_t) samples[start_val];
-
-            for(int j=0; j<samples.size(); ++j) SampleWave1->Fill(j,(Double_t)samples[j]);
-            SampleWave1->Write(Form("Chan_1_Wave_%d",counter));
-            SampleWave1->Reset();
-
-            ADC1_dig[num_points_dig1-1] = (double) -(Charge - Baseline*window_width);
-          }
-          if(chan == 0){
-            int start_1 = start_val_stat + trigger;
-            Double_t Baseline = 0;
-            for(int j=185; j<245; ++j) Baseline += (Double_t) samples[j];
-            //for(int j = 0; j < 400; ++j) Baseline += (Double_t) samples[j];
-            Baseline /=60;
-            Double_t Charge = 0;
-            for(start_1; start_1<start_val_stat+trigger+window_width; start_1++) Charge += (Double_t) samples[start_1];
-            for(int j=0; j<samples.size(); ++j) SampleWave0->Fill(j,(Double_t)samples[j]);
-            SampleWave0->Write(Form("Chan_0_Wave_%d",counter));
-            SampleWave0->Reset();
-
-            counter ++;
-            ADC0_dig[num_points_dig0-1] = (double) -(Charge - Baseline*window_width);
-          }
-
-          if(chan == 5) {
-            Double_t Baseline = 0;
-            for(int j = 185; j < 245; ++j) Baseline += (Double_t) samples[j];
-            Baseline /= 60;
-            Double_t Charge = 0;
-            for (start_val; start_val<start_val+window_width; ++start_val) Charge += (Double_t) samples[start_val];
-
-            for (int j = 0; j<samples.size(); ++j) SampleWave5->Fill(j, (Double_t)samples[j]);
-            SampleWave5->Write(Form("Chan_5_Wave_%d", counter));
-            SampleWave5->Reset();
-            ADC5_dig[num_points_dig1-1] = (double) -(Charge - Baseline*window_width);
-          }
-        }
-      }
-
-      ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      // Try gettting an ADC bank
-      TV792Data *bank = dataContainer.GetEventData<TV792Data>("ADC0");
-      // save event counter, to compare to TDC event counter
-      long int adc_event_counter = -1;
-      if(bank){
-        num_points++;
-        adc_event_counter = bank->GetEventCounter();
-
-        /// Get the Vector of ADC Measurements.
-        std::vector<VADCMeasurement> measurements = bank->GetMeasurements();
-        for(unsigned int i = 0; i < measurements.size(); i++){ // loop over measurements
-          int chan = measurements[i].GetChannel()-Ch_Offset;
-          uint32_t adc = measurements[i].GetMeasurement();
-          switch (chan){
-            case 0:
-              ADC0_voltage[num_points-1] = (int) adc;
-              break;
-            case 1:
-              ADC1_voltage[num_points-1] = (int) adc;
-              break;
-            case 2:
-              ADC2_voltage[num_points-1] = (int) adc;         
-              break;
-            case 3:
-              ADC3_voltage[num_points-1] = (int) adc;        
-              break;
-            case 4:
-              ADC4_voltage[num_points-1] = (int) adc;        
-              break;
-            default:
-              break;
-          }
-        }
-
-        // Reset the TDC variables, since we might not have them.
-        TDC0_voltage[num_points-1] = 0;
-        TDC1_voltage[num_points-1] = 0;
-        TDC2_voltage[num_points-1] = 0;
-        TDC3_voltage[num_points-1] = 0;
-        TDC4_voltage[num_points-1] = 0;	   	
-
-        //Try gettting a TDC bank
-        TV1190Data *tdcbank = dataContainer.GetEventData<TV1190Data>("TDC0");
-        // save event counter, to compare to TDC event counter
-        if(tdcbank) nbadTDCbanks++;
-
-        if(tdcbank){
-          long int tdc_event_counter = tdcbank->GetEventCounter();
-
-          ngoodTDCbanks++;
-
-          //	    printf("ADC/TDC counter (difference): %i %i (%i)\n",adc_event_counter, tdc_event_counter,tdc_event_counter-adc_event_counter);
-
-          uint32_t tdc_chan0 = 0xffffffff;
-          for(int j = 0; j < tdcbank->GetMeasurements().size(); j++){
-            int chan = tdcbank->GetMeasurements()[j].GetChannel();
-            uint32_t tdc = tdcbank->GetMeasurements()[j].GetMeasurement();
-            //		std::cout << "Chan tdc " << chan << " " << tdc << std::endl;
-
-            if(chan ==0){
-              TDC0_voltage[num_points-1] = tdc;
-              tdc_chan0 = tdc;
-            }else if(chan ==1){
-              TDC1_voltage[num_points-1] = tdc;
-            }else if(chan ==2){
-              TDC2_voltage[num_points-1] = tdc;
-              std::cout << "Diff " << chan << " " << tdc-tdc_chan0 << std::endl;
-            }else if(chan ==3){
-              TDC3_voltage[num_points-1] = tdc;
-              std::cout << "Diff " << chan << " " << tdc-tdc_chan0 << std::endl;
-            }else if(chan ==4){
-              TDC4_voltage[num_points-1] = tdc;
-              std::cout << "Diff " << tdc-tdc_chan0 << std::endl;
-            }
-
-          }
-
-        }
-
-
-        return true;
-      }
-
-      // Try getting V1730 bank
-      // Uncomment channels to get respective ROOT output from the file
-      TV1730RawData *v1730_b = dataContainer.GetEventData<TV1730RawData>("V730");
-      //printf("Decoded V1730 data\n");
-
-      if(v1730_b){      
-
-        // John 2019-11-05 Don't save unnecessary data
-        // First scan point has been saving too many events
-        if(num_points<nPoints_max){
-
-          //std::cout << "Filling V1730... " << num_points << std::endl;
-          if(bank || 1){
-            num_points++;
-
-
-            //std::cout << "point# "<< num_points << std::endl;
-
-            std::vector<RawChannelMeasurement> measurements = v1730_b->GetMeasurements();
-
-            for(int i = 0; i < measurements.size(); i++){
-
-              int chan = measurements[i].GetChannel();
-              //std::cout << "chan " << chan << std::endl;
-              if(chan < 0 || chan >5) continue; // 9.Nov.2017 updated for first 5 channels only
-              //		  std::cout << "chan " << chan << std::endl;
-
-              // saves num_v1730_max (currently 70) bins around each pulse
-              // laser pulse is given an offset as it occurs earlier in time
-              // Note: 1 ib  = 2 ns
-              // This is what writes Midas data to the ROOT tree
-
-              // Channel    Output
-              // 0          Primary PMT wave
-              // 1          Reference Wave
-              // 2          Gantry0 receiver PMT
-              // 3          Gantry0 monitor PMT
-              // 4          Gantry1 receiver PMT
-              // 5          Gantry1 monitor PMT
-
-              for(int ib = timeStart; ib < measurements[i].GetNSamples() && ib  < num_v1730_max + timeStart ; ib++){
-
-                //std::cout<<"ib = " <<ib <<std::endl;
-
-                if(chan == 0) V1730_wave0[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);  
-                if(chan == 1) V1730_wave1[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-timeStart); // -130 is the timeStart offset, meaning the reference signal window starts at the start of the digitizer readout
-                // if(chan == 2) V1730_wave2[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
-                if(chan == 3) V1730_wave3[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
-                if(chan == 5) V1730_wave5[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
-              }		  
-            }	      
-          }
-        }else{
-          std::cout << "Too many points! " << num_points << std::endl;
-        }
-        return true;
-      }
-
-
-      // Get BRB data
-      TBRBRawData *brb_b = dataContainer.GetEventData<TBRBRawData>("BRB0");
-
-      if(brb_b){      
-
-        if(num_points<nPoints_max){
-
-          if(bank || 1){
-            num_points++;
-
-
-            //            std::cout << "point# "<< num_points << std::endl;
-
-            std::vector<RawBRBMeasurement> measures = brb_b->GetMeasurements();
-
-            for(int i = 0; i < measures.size(); i++){
-
-           
-              int chan = measures[i].GetChannel();
-              int nsamples = measures[i].GetNSamples();
-
-              for(int ib = 0; ib < measures[i].GetNSamples(); ib++){
-                if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
-                if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
-              }              
-            }	      
-          }
-        }else{
-          std::cout << "Too many points! " << num_points << std::endl;
-        }
-
-        tree->Fill();
-        counter = 0;
-        num_points = 0;
-        num_points_dig0 = 0;
-        num_points_dig1 = 0;
-        num_phidg0_points = 0;
-        num_phidg1_points = 0;
-        num_phidg3_points = 0;
-        num_phidg4_points = 0;
-        gbl_accept_banks = FALSE;
+    //attempt at adding digitizer data
+    //Set input parameters which correspond to ADC measurements
+    start_val_stat = 90;
+    window_width = 45;
+    trigger = 40;
+    
+    // Get BRB data
+    TBRBRawData *brb_b = dataContainer.GetEventData<TBRBRawData>("BRB0");
+    
+    if(brb_b){      
+      
+      if(num_points<nPoints_max){
         
-        return true;
+        num_points++;
+        
+        std::vector<RawBRBMeasurement> measures = brb_b->GetMeasurements();
+        
+        for(int i = 0; i < measures.size(); i++){           
+          int chan = measures[i].GetChannel();
+          for(int ib = 0; ib < measures[i].GetNSamples(); ib++){
+            if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
+            if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
+          }              
+        }	      
+        
+      }else{
+        std::cout << "Too many points! " << num_points << std::endl;
       }
-
-      // Try getting a Phidget bank
-
-      TGenericData *bank_ph0 = dataContainer.GetEventData<TGenericData>("PH00");
-      if(bank_ph0){
-        num_phidg0_points++;
-        acc_x0[num_phidg0_points -1] = ((double*)bank_ph0->GetData64())[0];
-        acc_y0[num_phidg0_points -1] = ((double*)bank_ph0->GetData64())[1];
-        acc_z0[num_phidg0_points -1] = ((double*)bank_ph0->GetData64())[2];
-        x0_field[num_phidg0_points -1] = ((double*)bank_ph0->GetData64())[3];
-        y0_field[num_phidg0_points -1] = ((double*)bank_ph0->GetData64())[4];
-        z0_field[num_phidg0_points -1] = ((double*)bank_ph0->GetData64())[5];
-        tot0_field[num_phidg0_points -1] = ((double*)bank_ph0->GetData64())[6];    
-        tilt_phid0[num_phidg0_points -1] = ((double*)bank_ph0->GetData64())[7];
-        return true;
-      }
-
-      TGenericData *bank_ph1 = dataContainer.GetEventData<TGenericData>("PH01");
-      if(bank_ph1){
-        num_phidg1_points++;
-
-        acc_x1[num_phidg1_points -1] = ((double*)bank_ph1->GetData64())[0];
-        acc_y1[num_phidg1_points -1] = ((double*)bank_ph1->GetData64())[1];
-        acc_z1[num_phidg1_points -1] = ((double*)bank_ph1->GetData64())[2];
-        x1_field[num_phidg1_points -1] = ((double*)bank_ph1->GetData64())[3];
-        y1_field[num_phidg1_points -1] = ((double*)bank_ph1->GetData64())[4];
-        z1_field[num_phidg1_points -1] = ((double*)bank_ph1->GetData64())[5];
-        tilt_phid1[num_phidg1_points -1] = ((double*)bank_ph1->GetData64())[7];
-
-        return true;
-      }
-
-      TGenericData *bank_ph3 = dataContainer.GetEventData<TGenericData>("PH03");
-      if(bank_ph3){
-        num_phidg3_points++;
-
-        acc_x3[num_phidg3_points -1] = ((double*)bank_ph3->GetData64())[0];
-        acc_y3[num_phidg3_points -1] = ((double*)bank_ph3->GetData64())[1];
-        acc_z3[num_phidg3_points -1] = ((double*)bank_ph3->GetData64())[2];
-        x3_field[num_phidg3_points -1] = ((double*)bank_ph3->GetData64())[3];
-        y3_field[num_phidg3_points -1] = ((double*)bank_ph3->GetData64())[4];
-        z3_field[num_phidg3_points -1] = ((double*)bank_ph3->GetData64())[5];
-        tot3_field[num_phidg3_points -1] = ((double*)bank_ph3->GetData64())[6];    
-        tilt_phid3[num_phidg3_points -1] = ((double*)bank_ph3->GetData64())[7];
-
-        return true;
-      }
-
-      TGenericData *bank_ph4 = dataContainer.GetEventData<TGenericData>("PH04");
-      if(bank_ph4){
-        num_phidg4_points++;
-
-        acc_x4[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[0];
-        acc_y4[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[1];
-        acc_z4[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[2];
-        x4_field[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[3];
-        y4_field[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[4];
-        z4_field[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[5];
-        tot4_field[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[6];    
-        tilt_phid4[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[7];
-
-        return true;
-      }
-
-      //Grab the gantry bank 
-      TGenericData *bank_cyc = dataContainer.GetEventData<TGenericData>("CYC0");
-      if(bank_cyc){ 
-        counter_gant = (int)((double*)bank_cyc->GetData64())[0];
-
-        x0_pos = ((double*)bank_cyc->GetData64())[1];
-        y0_pos = ((double*)bank_cyc->GetData64())[2];
-        z0_pos = ((double*)bank_cyc->GetData64())[3];
-        rot0_pos = ((double*)bank_cyc->GetData64())[4];
-        tilt0_pos = ((double*)bank_cyc->GetData64())[5];
-        x1_pos = ((double*)bank_cyc->GetData64())[6];
-        y1_pos = ((double*)bank_cyc->GetData64())[7];
-        z1_pos = ((double*)bank_cyc->GetData64())[8];
-        rot1_pos = ((double*)bank_cyc->GetData64())[9];
-        tilt1_pos = ((double*)bank_cyc->GetData64())[10];
-
-        cyctime = ((double*)bank_cyc->GetData64())[11];
-
-        std::cout << counter_gant << " " 
-          << time << " " << ((double*)bank_cyc->GetData64())[11] 
-          << std::endl;
-
-        /* DEBUG */
-        //std::cout << counter_gant << " " << i << " " 
-        //<<  x0_pos[i] << " " << y0_pos[i] << " " << z0_pos[i] << " " 
-        //<< time[i] << " " 
-        //<< std::endl;
-
-        if(counter_gant%500 == 0)
-          std::cout << "Event " << counter_gant << std::endl;
-      }
-
-      TGenericData *bank_mag = dataContainer.GetEventData<TGenericData>("MAG0");
-      if(bank_mag){ 	
-        counter_mag = ((double*)bank_mag->GetData64())[0];
-
-        //in feScan: filled from [1-80], [1-40] is current
-        curr_coil1 = ((double*)bank_mag->GetData64())[9];
-        curr_coil2 = ((double*)bank_mag->GetData64())[10];
-        curr_coil3 = ((double*)bank_mag->GetData64())[1];
-        curr_coil4 = ((double*)bank_mag->GetData64())[2];
-        curr_coil5 = ((double*)bank_mag->GetData64())[3];
-        curr_coil6 = ((double*)bank_mag->GetData64())[4];
-        curr_hpd_enable = ((double*)bank_mag->GetData64())[5];
-        curr_hpd_hv_control = ((double*)bank_mag->GetData64())[6];
-        curr_hpd_lv_control = ((double*)bank_mag->GetData64())[7];
-        curr_receiver0 = ((double*)bank_mag->GetData64())[33];
-        curr_monitor0 = ((double*)bank_mag->GetData64())[34];
-        curr_receiver1 = ((double*)bank_mag->GetData64())[35];
-        curr_monitor1 = ((double*)bank_mag->GetData64())[36];
-
-
-        volt_coil1 = ((double*)bank_mag->GetData64())[49];
-        volt_coil2 = ((double*)bank_mag->GetData64())[50];
-        volt_coil3 = ((double*)bank_mag->GetData64())[41];
-        volt_coil4 = ((double*)bank_mag->GetData64())[42];
-        volt_coil5 = ((double*)bank_mag->GetData64())[43];
-        volt_coil6 = ((double*)bank_mag->GetData64())[44];
-
-        volt_hpd_enable = ((double*)bank_mag->GetData64())[45];
-        volt_hpd_hv_control = ((double*)bank_mag->GetData64())[46];
-        volt_hpd_lv_control = ((double*)bank_mag->GetData64())[47];
-        volt_receiver0 = ((double*)bank_mag->GetData64())[73];
-        volt_monitor0 = ((double*)bank_mag->GetData64())[74];
-        volt_receiver1 = ((double*)bank_mag->GetData64())[75];
-        volt_monitor1 = ((double*)bank_mag->GetData64())[76];
-
-      }
+      
+      tree->Fill();
+      counter = 0;
+      num_points = 0;
+      num_points_dig0 = 0;
+      num_points_dig1 = 0;
+      num_phidg0_points = 0;
+      num_phidg1_points = 0;
+      num_phidg3_points = 0;
+      num_phidg4_points = 0;
+      gbl_accept_banks = FALSE;
+      
+      return true;
     }
+    
     return true;
   }
 
