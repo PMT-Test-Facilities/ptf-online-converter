@@ -70,6 +70,8 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   double acc_x4[num_phidg_max], acc_y4[num_phidg_max], acc_z4[num_phidg_max];
 
   double int_temp, ext1_temp,ext2_temp;
+  
+  Double_t timestamp;//Adding timing variable
 
   //current and voltage of each of the 6 Helmholtz coils
   int counter_mag;
@@ -151,7 +153,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("TDC3_voltage",TDC3_voltage,"TDC3_voltage[num_points]/Int_t");    
     tree->Branch("TDC4_voltage",TDC4_voltage,"TDC4_voltage[num_points]/Int_t");          
 
-    tree->Branch("time",&time,"time/Double_t");        //arbitrary offset in time, in ms, either UInt or larger, so just be safe
+    tree->Branch("timestamp",&timestamp,"timestamp/Double_t");        //real time used in sec
     tree->Branch("gantry_event",&counter_gant,"gantry_event/Int_t"); //an event is a measurement at a point
     tree->Branch("gantry_subevent",&subevent,"gantry_subevent/Int_t");
 
@@ -316,6 +318,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     }
     bank = dataContainer.GetEventData<TGenericData>("BONM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
     if(bank){
+	  timestamp=dataContainer.GetMidasData().GetTimeStamp();//this is where we fill the tree for the time
       std::cout << "end of move" << std::endl;
       tree->Fill();
       counter = 0;
@@ -337,7 +340,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       window_width = 45;
       trigger = 40;
       int eventid = dataContainer.GetMidasData().GetEventId();
-      int timestamp = dataContainer.GetMidasData().GetTimeStamp();
+      //int timestamp = dataContainer.GetMidasData().GetTimeStamp(); no longer used
       TV1730RawData *v1730 = dataContainer.GetEventData<TV1730RawData>("V730");
       if(v1730 && 0){
         std::vector<RawChannelMeasurement> measurements = v1730->GetMeasurements();
