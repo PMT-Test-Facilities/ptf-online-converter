@@ -68,6 +68,9 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   double acc_x3[num_phidg_max], acc_y3[num_phidg_max], acc_z3[num_phidg_max];
   double acc_x4[num_phidg_max], acc_y4[num_phidg_max], acc_z4[num_phidg_max];
 
+  double int_temp, ext1_temp,ext2_temp;
+  
+  Double_t timestamp;//Adding timing variable
 
   //current and voltage of each of the 6 Helmholtz coils
   int counter_mag;
@@ -126,7 +129,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("num_points_dig0",&num_points_dig0,"num_points_dig0/Int_t");
     tree->Branch("num_points_dig1",&num_points_dig1,"num_points_dig1/Int_t");    
 
-    tree->Branch("time",&time,"time/Double_t");        //arbitrary offset in time, in ms, either UInt or larger, so just be safe
+    tree->Branch("timestamp",&timestamp,"timestamp/Double_t");        //real time used in sec
     tree->Branch("gantry_event",&counter_gant,"gantry_event/Int_t"); //an event is a measurement at a point
     tree->Branch("gantry_subevent",&subevent,"gantry_subevent/Int_t");
 
@@ -203,6 +206,10 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("phidg4_Btot",tot4_field,"phidg4_Btot[num_phidg4_points]/Double_t");
     tree->Branch("phidg4_tilt",tilt_phid4,"phidg4_tilt[num_phidg4_points]/Double_t");
 
+    tree->Branch("int_temp",&int_temp,"int_temp/Double_t");
+    tree->Branch("ext1_temp",&ext1_temp,"ext1_temp/Double_t");
+    tree->Branch("ext2_temp",&ext2_temp,"ext2_temp/Double_t");
+
     //Helmholtz Coil related 
     tree->Branch("coil_event",&counter_mag,"coil_event/Int_t");
     tree->Branch("I_coil1",&curr_coil1,"I_coil1/Double_t");
@@ -278,6 +285,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     }
     bank = dataContainer.GetEventData<TGenericData>("BONM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
     if(bank){
+	  timestamp=dataContainer.GetMidasData().GetTimeStamp();//this is where we fill the tree for the time
       std::cout << "end of move" << std::endl;
       tree->Fill();
       counter = 0;
@@ -413,6 +421,14 @@ class ScanToTreeConverter: public TRootanaEventLoop {
         tilt_phid4[num_phidg4_points -1] = ((double*)bank_ph4->GetData64())[7];
 
         return true;
+      }
+
+      // Check for environment temperature monitoring data
+      TGenericData *envt = dataContainer.GetEventData<TGenericData>("ENVT");
+      if(envt){
+	  int_temp = ((float*)envt->GetData64())[0];
+	  ext1_temp = ((float*)envt->GetData64())[1];
+	  ext2_temp = ((float*)envt->GetData64())[2];
       }
 
       //Grab the gantry bank 
