@@ -23,6 +23,7 @@
 
 #define nPoints_max 1
 #define num_phidg_max 10000
+#define max_temp_sensor 20
 #define num_v1730_max 1024 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
 
   int counter_gant;                                    //n-th measurement
@@ -71,6 +72,8 @@
   double V1730_wave0[nPoints_max][num_v1730_max],  V1730_wave1[nPoints_max][num_v1730_max],  V1730_wave2[nPoints_max][num_v1730_max], V1730_wave3[nPoints_max][num_v1730_max], V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max], V1730_wave6[nPoints_max][num_v1730_max], V1730_wave7[nPoints_max][num_v1730_max];
   double V1730_wave8[nPoints_max][num_v1730_max],  V1730_wave9[nPoints_max][num_v1730_max],  V1730_wave10[nPoints_max][num_v1730_max], V1730_wave11[nPoints_max][num_v1730_max], V1730_wave12[nPoints_max][num_v1730_max], V1730_wave13[nPoints_max][num_v1730_max], V1730_wave14[nPoints_max][num_v1730_max], V1730_wave15[nPoints_max][num_v1730_max];
   double V1730_wave16[nPoints_max][num_v1730_max],  V1730_wave17[nPoints_max][num_v1730_max],  V1730_wave18[nPoints_max][num_v1730_max], V1730_wave19[nPoints_max][num_v1730_max], V1730_wave20[nPoints_max][num_v1730_max], V1730_wave21[nPoints_max][num_v1730_max], V1730_wave22[nPoints_max][num_v1730_max], V1730_wave23[nPoints_max][num_v1730_max];
+
+  double temperatures[max_temp_sensor]; 
 
 
   //PMT readout
@@ -243,6 +246,17 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("phidg4_Btot",tot4_field,"phidg4_Btot[num_phidg4_points]/Double_t");
     tree->Branch("phidg4_tilt",tilt_phid4,"phidg4_tilt[num_phidg4_points]/Double_t");
 
+    tree->Branch("temperatures",temperatures,"temperatures[20]/Double_t");
+    // temperature sensors 0-7 from mainboard, 8-19 from phidgets
+    // 0 -> ADC3   
+    // 1 -> POE temp
+    // 2 -> ambient 
+    // 8 -> phidget 0
+    // 9 -> phidget 1
+    // 10 -> phidget 2
+    // 11 -> phidget 3
+    // etc
+
     //Helmholtz Coil related 
     tree->Branch("coil_event",&counter_mag,"coil_event/Int_t");
     tree->Branch("I_coil1",&curr_coil1,"I_coil1/Double_t");
@@ -354,6 +368,19 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       
       return true;
     }
+
+    TGenericData *envt = dataContainer.GetEventData<TGenericData>("BRT0");
+    if(envt){
+      temperatures[0] = ((float*)envt->GetData64())[0];
+      temperatures[1] = ((float*)envt->GetData64())[1];
+      temperatures[2] = ((float*)envt->GetData64())[2];
+
+      std::cout << "Mainboard temperatures: " 
+		<< temperatures[0] << " " 
+		<< temperatures[2] << " " 
+		<< temperatures[2] << std::endl; 
+    }
+
     
     return true;
   }
