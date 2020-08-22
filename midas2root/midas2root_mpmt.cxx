@@ -381,6 +381,23 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 		<< temperatures[2] << std::endl; 
     }
 
+    TGenericData *tmp0 = dataContainer.GetEventData<TGenericData>("TMP0");
+    if(tmp0){
+      for(int i = 0; i < 6; i++){ 
+	temperatures[i+8] = ((double*)tmp0->GetData64())[i];
+      }
+    
+      std::cout << "Phidget temperatures: " 
+		<< temperatures[8] << " " 
+		<< temperatures[9] << " " 
+		<< temperatures[10] << " " 
+		<< temperatures[11] << " " 
+		<< temperatures[12] << " " 
+		<< temperatures[13] << " " 
+		<< std::endl; 
+    }
+
+
     
     return true;
   }
