@@ -298,6 +298,21 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     ngoodTDCbanks = 0;
     nbadTDCbanks = 0; 
 
+    // Fill a settings tree using information from ODB
+    MVOdb* odb = GetODB();
+    std::vector<int> hv;
+    //int hv;
+    odb->RIA("/Equipment/PMTS00/Settings/HVset",&hv);
+    //odb->RI("/Equipment/PMTS00/Statistics/Events sent",&hv);
+    std::cout << "HV set: " << hv[0] << " " << hv[1] << std::endl;
+
+    double rate;			       
+    int events;
+    //int hv;
+    odb->RD("/Equipment/BRB/Statistics/Events per sec.",&rate);
+    odb->RI("/Equipment/BRB/Statistics/Events sent",&events);
+    std::cout << "Check online/offline: " << rate << " " << events << std::endl;
+
   }
 
   void EndRun(int transition,int run,int time){
