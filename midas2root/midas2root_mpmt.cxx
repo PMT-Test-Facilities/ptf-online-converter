@@ -296,9 +296,13 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     StartVal0->SetDirectory(0);
 
     ngoodTDCbanks = 0;
-    nbadTDCbanks = 0; 
+    nbadTDCbanks = 0;
+    
 
     // Fill a settings tree using information from ODB
+#ifdef INCLUDE_MVODB_H
+    std::cout << "Filling Setting TTree " << std::endl;
+
     MVOdb* odb = GetODB();
     TTree *settings_tree = new TTree("settings_tree","Settings Tree");
 
@@ -344,6 +348,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     }
 
     settings_tree->Fill();
+#endif  // Done ifdef settings ttree filling
 
 
   }
