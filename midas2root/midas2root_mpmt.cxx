@@ -300,18 +300,51 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
     // Fill a settings tree using information from ODB
     MVOdb* odb = GetODB();
-    std::vector<int> hv;
-    //int hv;
-    odb->RIA("/Equipment/PMTS00/Settings/HVset",&hv);
-    //odb->RI("/Equipment/PMTS00/Statistics/Events sent",&hv);
-    std::cout << "HV set: " << hv[0] << " " << hv[1] << std::endl;
+    TTree *settings_tree = new TTree("settings_tree","Settings Tree");
 
-    double rate;			       
-    int events;
-    //int hv;
-    odb->RD("/Equipment/BRB/Statistics/Events per sec.",&rate);
-    odb->RI("/Equipment/BRB/Statistics/Events sent",&events);
-    std::cout << "Check online/offline: " << rate << " " << events << std::endl;
+    int channel_mask;
+    settings_tree->Branch("channel_mask",&channel_mask,"channel_mask/Int_t"); 
+    
+    double HVsetpoints[20];    
+    settings_tree->Branch("HVsetpoints",&HVsetpoints,"HVsetpoints[20]/Double_t"); 
+
+    double HVreadback[20];    
+    settings_tree->Branch("HVreadback",&HVreadback,"HVreadback[20]/Double_t"); 
+
+    double HVcurrent[20];    
+    settings_tree->Branch("HVcurrent",&HVcurrent,"HVcurrent[20]/Double_t"); 
+
+    double calc_baseline[20];    
+    settings_tree->Branch("CalcBaseline",&calc_baseline,"CalcBaseline[20]/Double_t"); 
+
+    // BRB Settings and readback
+    odb->RI("/Equipment/BRB/Settings/channel mask",&channel_mask);
+        
+    // PMT settings and readback
+    std::vector<int> hv; // set point
+    odb->RIA("/Equipment/PMTS/Settings/HVset",&hv);
+    std::vector<double> readback; // HV readback
+    odb->RDA("/Equipment/PMTS/Variables/PMV0",&readback);
+    std::vector<double> current; // HV readback
+    odb->RDA("/Equipment/PMTS/Variables/PMI0",&current);
+    
+    // Get calculated baseline
+    std::vector<double> baseline; // HV readback
+    odb->RDA("/Analyzer/Baselines/Baseline",&baseline);
+    
+    
+    // Stupidly need to copy from vector to array, I think
+    for(int i = 0; i < 20; i++){
+      HVsetpoints[i] = hv[i];
+      HVreadback[i] = readback[i];
+      HVcurrent[i] = current[i];
+      calc_baseline[i] = baseline[i];
+
+      std::cout << "Baseline " << i << "  "<< baseline[i] << " " << calc_baseline[i] << std::endl;
+    }
+
+    settings_tree->Fill();
+
 
   }
 
