@@ -67,7 +67,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   double tilt_phid3[num_phidg_max], tilt_phid4[num_phidg_max];                       //tilt position from phidget
   double acc_x3[num_phidg_max], acc_y3[num_phidg_max], acc_z3[num_phidg_max];
   double acc_x4[num_phidg_max], acc_y4[num_phidg_max], acc_z4[num_phidg_max];
-
+  double acc0_x0[num_phidg_max], acc0_y0[num_phidg_max], acc0_z0[num_phidg_max];
   double int_temp, ext1_temp,ext2_temp;
   
   Double_t timestamp;//Adding timing variable
@@ -140,7 +140,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("gantry0_rot",&rot0_pos,"gantry0_rot/Double_t");
     //tree->Branch("phidg0_tilt",&tilt_phid0,"phidg0_tilt/Double_t");
 
-
+  
     tree->Branch("Start_time0",&Start_time0,"Start_time0[num_points_dig0]/Double_t");
     tree->Branch("Start_time1",&Start_time1,"Start_time1[num_points_dig1]/Double_t");
     tree->Branch("Window_width0",&Window_width0,"Window_width0[num_points_dig0]/Double_t");
@@ -164,6 +164,12 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("gantry1_tilt",&tilt1_pos,"gantry1_tilt/Double_t");
     tree->Branch("gantry1_rot",&rot1_pos,"gantry1_rot/Double_t");
     //tree->Branch("phidg1_tilt",&tilt_phid1,"phidg1_tilt/Double_t");
+	
+	tree->Branch("num_phidg5_points",&num_phidg5_points,"num_phidg5_points/Int_t");
+	tree->Branch("phidgACC_Ax",acc0_x0,"phidgACC_Ax[num_phidg5_points]/Double_t");
+	tree->Branch("phidgACC_Ay",acc0_y0,"phidgACC_Ay[num_phidg5_points]/Double_t");
+	 tree->Branch("phidgACC_Az",acc0_z0,"phidgACC_Az[num_phidg5_points]/Double_t");
+	
 
     //field-related phidget measurements
     tree->Branch("num_phidg0_points",&num_phidg0_points,"num_phidg0_points/Int_t");
@@ -296,6 +302,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       num_phidg1_points = 0;
       num_phidg3_points = 0;
       num_phidg4_points = 0;
+	  num_phidg5_points = 0;
       gbl_accept_banks = FALSE;
       return true;
     }
@@ -422,7 +429,17 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
         return true;
       }
+	  TGenericData *bank_ph5 = dataContainer.GetEventData<TGenericData>("PA00");
+	  if(bank_ph5){
+	            num_phidg5_points++;
+	            acc0_x0[num_phidg5_points -1] = ((double*)bank_ph5->GetData64())[0];
+	            acc0_y0[num_phidg5_points -1] = ((double*)bank_ph5->GetData64())[1];
+	            acc0_z0[num_phidg5_points -1] = ((double*)bank_ph5->GetData64())[2];
+	            //time_acc[num_phidg5_points -1] = ((double*)bank_ph5->GetData64())[7];                                                                                                                             
+	            return true;
+	        }
 
+	  
       // Check for environment temperature monitoring data
       TGenericData *envt = dataContainer.GetEventData<TGenericData>("ENVT");
       if(envt){
