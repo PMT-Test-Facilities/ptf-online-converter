@@ -123,7 +123,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   ScanToTreeConverter() {
     UseBatchMode(); //necessary to switch off graphics, used in for example AnaDisplay
     nnn = 0;
-    fNChan = 2;
+    fNChan = 4;
   };
 
   virtual ~ScanToTreeConverter() {};
@@ -387,6 +387,8 @@ class ScanToTreeConverter: public TRootanaEventLoop {
           for(int ib = 0; ib < measures[i].GetNSamples(); ib++){
             if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
             if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
+            if(chan == 2) V1730_wave2[num_points-1][ib] = measures[i].GetSample(ib);  
+            if(chan == 3) V1730_wave3[num_points-1][ib] = measures[i].GetSample(ib);  
           }              
         }	      
         
