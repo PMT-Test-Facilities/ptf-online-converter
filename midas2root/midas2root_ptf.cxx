@@ -65,10 +65,13 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   double x3_field[num_phidg_max], y3_field[num_phidg_max], z3_field[num_phidg_max], tot3_field[num_phidg_max];     //B-field from phidget3
   int num_phidg4_points;
   double x4_field[num_phidg_max], y4_field[num_phidg_max], z4_field[num_phidg_max], tot4_field[num_phidg_max];     //B-field from phidget4
-  double tilt_phid3[num_phidg_max], tilt_phid4[num_phidg_max];                       //tilt position from phidget
+  double tilt_phid3[num_phidg_max], tilt_phid4[num_phidg_max];   
+                      //tilt position from phidget
+  
   double acc_x3[num_phidg_max], acc_y3[num_phidg_max], acc_z3[num_phidg_max];
   double acc_x4[num_phidg_max], acc_y4[num_phidg_max], acc_z4[num_phidg_max];
-
+  int num_ACC_points
+  double acc0_x0[num_phidg_max], acc0_y0[num_phidg_max], acc0_z0[num_phidg_max];
   double int_temp, ext1_temp,ext2_temp;
   double temperatures[max_temp_sensor];  // temperatures[0] is int temp, temperatures[1] is ext1, temperature[2] is ext2
 
@@ -142,7 +145,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("gantry0_rot",&rot0_pos,"gantry0_rot/Double_t");
     //tree->Branch("phidg0_tilt",&tilt_phid0,"phidg0_tilt/Double_t");
 
-
+  
     tree->Branch("Start_time0",&Start_time0,"Start_time0[num_points_dig0]/Double_t");
     tree->Branch("Start_time1",&Start_time1,"Start_time1[num_points_dig1]/Double_t");
     tree->Branch("Window_width0",&Window_width0,"Window_width0[num_points_dig0]/Double_t");
@@ -166,6 +169,12 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("gantry1_tilt",&tilt1_pos,"gantry1_tilt/Double_t");
     tree->Branch("gantry1_rot",&rot1_pos,"gantry1_rot/Double_t");
     //tree->Branch("phidg1_tilt",&tilt_phid1,"phidg1_tilt/Double_t");
+	
+	tree->Branch("num_ACC_points",&num_ACC_points,"num_ACC_points/Int_t");
+	tree->Branch("phidgACC_Ax",acc0_x0,"phidgACC_Ax[num_ACC_points]/Double_t");
+	tree->Branch("phidgACC_Ay",acc0_y0,"phidgACC_Ay[num_ACC_points]/Double_t");
+	 tree->Branch("phidgACC_Az",acc0_z0,"phidgACC_Az[num_ACC_points]/Double_t");
+	
 
     //field-related phidget measurements
     tree->Branch("num_phidg0_points",&num_phidg0_points,"num_phidg0_points/Int_t");
@@ -299,6 +308,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       num_phidg1_points = 0;
       num_phidg3_points = 0;
       num_phidg4_points = 0;
+	  num_ACC_points = 0;
       gbl_accept_banks = FALSE;
       return true;
     }
@@ -425,7 +435,17 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
         return true;
       }
+	  TGenericData *bank_phACC = dataContainer.GetEventData<TGenericData>("PA00");
+	  if(bank_phACC){
+	            num_ACC_points++;
+	            acc0_x0[num_ACC_points -1] = ((double*)bank_ph5->GetData64())[0];
+	            acc0_y0[num_ACC_points -1] = ((double*)bank_ph5->GetData64())[1];
+	            acc0_z0[num_ACC_points -1] = ((double*)bank_ph5->GetData64())[2];
+	            //time_acc[num_ACC_points -1] = ((double*)bank_ph5->GetData64())[7];                                                                                                                             
+	            return true;
+	        }
 
+	  
       // Check for environment temperature monitoring data
       TGenericData *envt = dataContainer.GetEventData<TGenericData>("ENVT");
       if(envt){
