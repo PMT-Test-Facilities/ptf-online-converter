@@ -123,7 +123,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   ScanToTreeConverter() {
     UseBatchMode(); //necessary to switch off graphics, used in for example AnaDisplay
     nnn = 0;
-    fNChan = 4;
+    fNChan = 19; // < Saving waveforms from 0 to 19
   };
 
   virtual ~ScanToTreeConverter() {};
@@ -388,7 +388,23 @@ class ScanToTreeConverter: public TRootanaEventLoop {
             if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
             if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
             if(chan == 2) V1730_wave2[num_points-1][ib] = measures[i].GetSample(ib);  
-            if(chan == 3) V1730_wave3[num_points-1][ib] = measures[i].GetSample(ib);  
+            if(chan == 3) V1730_wave3[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 4) V1730_wave4[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 5) V1730_wave5[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 6) V1730_wave6[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 7) V1730_wave7[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 8) V1730_wave8[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 9) V1730_wave9[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 10) V1730_wave10[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 11) V1730_wave11[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 12) V1730_wave12[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 13) V1730_wave13[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 14) V1730_wave14[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 15) V1730_wave15[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 16) V1730_wave16[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 17) V1730_wave17[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 18) V1730_wave18[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 19) V1730_wave19[num_points-1][ib] = measures[i].GetSample(ib);
           }              
         }	      
         
