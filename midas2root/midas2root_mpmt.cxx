@@ -126,7 +126,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   ScanToTreeConverter() {
     UseBatchMode(); //necessary to switch off graphics, used in for example AnaDisplay
     nnn = 0;
-    fNChan = 2;
+    fNChan = 19; // < Saving waveforms from 0 to 19
   };
 
   virtual ~ScanToTreeConverter() {};
@@ -310,7 +310,60 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     StartVal0->SetDirectory(0);
 
     ngoodTDCbanks = 0;
-    nbadTDCbanks = 0; 
+    nbadTDCbanks = 0;
+    
+
+    // Fill a settings tree using information from ODB
+#ifdef INCLUDE_MVODB_H
+    std::cout << "Filling Setting TTree " << std::endl;
+
+    MVOdb* odb = GetODB();
+    TTree *settings_tree = new TTree("settings_tree","Settings Tree");
+
+    int channel_mask;
+    settings_tree->Branch("channel_mask",&channel_mask,"channel_mask/Int_t"); 
+    
+    double HVsetpoints[20];    
+    settings_tree->Branch("HVsetpoints",&HVsetpoints,"HVsetpoints[20]/Double_t"); 
+
+    double HVreadback[20];    
+    settings_tree->Branch("HVreadback",&HVreadback,"HVreadback[20]/Double_t"); 
+
+    double HVcurrent[20];    
+    settings_tree->Branch("HVcurrent",&HVcurrent,"HVcurrent[20]/Double_t"); 
+
+    double calc_baseline[20];    
+    settings_tree->Branch("CalcBaseline",&calc_baseline,"CalcBaseline[20]/Double_t"); 
+
+    // BRB Settings and readback
+    odb->RI("/Equipment/BRB/Settings/channel mask",&channel_mask);
+        
+    // PMT settings and readback
+    std::vector<int> hv; // set point
+    odb->RIA("/Equipment/PMTS/Settings/HVset",&hv);
+    std::vector<double> readback; // HV readback
+    odb->RDA("/Equipment/PMTS/Variables/PMV0",&readback);
+    std::vector<double> current; // HV readback
+    odb->RDA("/Equipment/PMTS/Variables/PMI0",&current);
+    
+    // Get calculated baseline
+    std::vector<double> baseline; // HV readback
+    odb->RDA("/Analyzer/Baselines/Baseline",&baseline);
+    
+    
+    // Stupidly need to copy from vector to array, I think
+    for(int i = 0; i < 20; i++){
+      HVsetpoints[i] = hv[i];
+      HVreadback[i] = readback[i];
+      HVcurrent[i] = current[i];
+      calc_baseline[i] = baseline[i];
+
+      std::cout << "Baseline " << i << "  "<< baseline[i] << " " << calc_baseline[i] << std::endl;
+    }
+
+    settings_tree->Fill();
+#endif  // Done ifdef settings ttree filling
+
 
   }
 
@@ -348,6 +401,24 @@ class ScanToTreeConverter: public TRootanaEventLoop {
           for(int ib = 0; ib < measures[i].GetNSamples(); ib++){
             if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
             if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
+            if(chan == 2) V1730_wave2[num_points-1][ib] = measures[i].GetSample(ib);  
+            if(chan == 3) V1730_wave3[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 4) V1730_wave4[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 5) V1730_wave5[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 6) V1730_wave6[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 7) V1730_wave7[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 8) V1730_wave8[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 9) V1730_wave9[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 10) V1730_wave10[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 11) V1730_wave11[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 12) V1730_wave12[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 13) V1730_wave13[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 14) V1730_wave14[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 15) V1730_wave15[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 16) V1730_wave16[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 17) V1730_wave17[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 18) V1730_wave18[num_points-1][ib] = measures[i].GetSample(ib);
+            if(chan == 19) V1730_wave19[num_points-1][ib] = measures[i].GetSample(ib);
           }              
         }	      
         

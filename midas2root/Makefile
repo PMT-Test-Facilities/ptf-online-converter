@@ -59,7 +59,7 @@ endif # MIDASSYS
 
 OBJS:= TTreeMaker.o TBRBRawData.o
 
-all: $(OBJS)  midas2root_ptf.exe midas2root_mpmt.exe
+all: $(OBJS)  midas2root_ptf.exe midas2root_mpmt.exe eventDisplay.exe
 
 midas2root_ptf.exe: midas2root_ptf.cxx $(OBJS) 
 	$(CXX) -o $@ $(CXXFLAGS) $^ $(LIBS) $(ROOTGLIBS) -lm -lz -lpthread -lssl -lutil
@@ -67,6 +67,8 @@ midas2root_ptf.exe: midas2root_ptf.cxx $(OBJS)
 midas2root_mpmt.exe: midas2root_mpmt.cxx $(OBJS) 
 	$(CXX) -o $@ $(CXXFLAGS) $^ $(LIBS) $(ROOTGLIBS) -lm -lz -lpthread -lssl -lutil
 
+eventDisplay.exe: eventDisplay.cpp $(OBJS)
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LIBS) $(ROOTGLIBS) -lm -lz -lpthread -lssl -lutil
 
 %.o: %.cxx
 	$(CXX) -o $@ $(CXXFLAGS) -c $<
