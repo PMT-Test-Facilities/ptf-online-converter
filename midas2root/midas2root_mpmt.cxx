@@ -123,7 +123,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   ScanToTreeConverter() {
     UseBatchMode(); //necessary to switch off graphics, used in for example AnaDisplay
     nnn = 0;
-    fNChan = 19; // < Saving waveforms from 0 to 19
+    fNChan = 20; // < Saving waveforms from 0 to 19
   };
 
   virtual ~ScanToTreeConverter() {};
