@@ -19,6 +19,7 @@
 
 #define nPoints_max 6000 // John 2019-11-05 Reduced from 1000000
 #define num_phidg_max 10000
+#define max_temp_sensor 20
 #define num_v1730_max 70 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
 #define timeStart 130 // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 70 samples.
 
@@ -69,7 +70,8 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   double acc_x4[num_phidg_max], acc_y4[num_phidg_max], acc_z4[num_phidg_max];
 
   double int_temp, ext1_temp,ext2_temp;
-  
+  double temperatures[max_temp_sensor];  // temperatures[0] is int temp, temperatures[1] is ext1, temperature[2] is ext2
+
   Double_t timestamp;//Adding timing variable
 
   //current and voltage of each of the 6 Helmholtz coils
@@ -209,6 +211,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("int_temp",&int_temp,"int_temp/Double_t");
     tree->Branch("ext1_temp",&ext1_temp,"ext1_temp/Double_t");
     tree->Branch("ext2_temp",&ext2_temp,"ext2_temp/Double_t");
+    tree->Branch("temperatures",temperatures,"temperatures[20]/Double_t");
 
     //Helmholtz Coil related 
     tree->Branch("coil_event",&counter_mag,"coil_event/Int_t");
@@ -429,6 +432,10 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 	  int_temp = ((float*)envt->GetData64())[0];
 	  ext1_temp = ((float*)envt->GetData64())[1];
 	  ext2_temp = ((float*)envt->GetData64())[2];
+
+	  temperatures[0] = ((float*)envt->GetData64())[0];
+          temperatures[1] = ((float*)envt->GetData64())[1];
+          temperatures[2] = ((float*)envt->GetData64())[2];
       }
 
       //Grab the gantry bank 
