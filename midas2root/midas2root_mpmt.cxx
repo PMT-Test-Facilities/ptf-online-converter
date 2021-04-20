@@ -126,7 +126,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   ScanToTreeConverter() {
     UseBatchMode(); //necessary to switch off graphics, used in for example AnaDisplay
     nnn = 0;
-    fNChan = 19; // < Saving waveforms from 0 to 19
+    fNChan = 20; // < Saving waveforms from 0 to 19
   };
 
   virtual ~ScanToTreeConverter() {};
@@ -338,13 +338,14 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     // BRB Settings and readback
     odb->RI("/Equipment/BRB/Settings/channel mask",&channel_mask);
         
+    std::cout << "Read values "<< std::endl;
     // PMT settings and readback
     std::vector<int> hv; // set point
-    odb->RIA("/Equipment/PMTS/Settings/HVset",&hv);
+    odb->RIA("/Equipment/PMTS01/Settings/HVset",&hv);
     std::vector<double> readback; // HV readback
-    odb->RDA("/Equipment/PMTS/Variables/PMV0",&readback);
+    odb->RDA("/Equipment/PMTS01/Variables/PMV1",&readback);
     std::vector<double> current; // HV readback
-    odb->RDA("/Equipment/PMTS/Variables/PMI0",&current);
+    odb->RDA("/Equipment/PMTS01/Variables/PMI1",&current);
     
     // Get calculated baseline
     std::vector<double> baseline; // HV readback
