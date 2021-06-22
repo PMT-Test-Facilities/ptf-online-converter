@@ -70,7 +70,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   
   double acc_x3[num_phidg_max], acc_y3[num_phidg_max], acc_z3[num_phidg_max];
   double acc_x4[num_phidg_max], acc_y4[num_phidg_max], acc_z4[num_phidg_max];
-  int num_ACC_points
+  int num_ACC_points;
   double acc0_x0[num_phidg_max], acc0_y0[num_phidg_max], acc0_z0[num_phidg_max];
   double int_temp, ext1_temp,ext2_temp;
   double temperatures[max_temp_sensor];  // temperatures[0] is int temp, temperatures[1] is ext1, temperature[2] is ext2
@@ -438,9 +438,9 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 	  TGenericData *bank_phACC = dataContainer.GetEventData<TGenericData>("PA00");
 	  if(bank_phACC){
 	            num_ACC_points++;
-	            acc0_x0[num_ACC_points -1] = ((double*)bank_ph5->GetData64())[0];
-	            acc0_y0[num_ACC_points -1] = ((double*)bank_ph5->GetData64())[1];
-	            acc0_z0[num_ACC_points -1] = ((double*)bank_ph5->GetData64())[2];
+	            acc0_x0[num_ACC_points -1] = ((double*)bank_phACC->GetData64())[0];
+	            acc0_y0[num_ACC_points -1] = ((double*)bank_phACC->GetData64())[1];
+	            acc0_z0[num_ACC_points -1] = ((double*)bank_phACC->GetData64())[2];
 	            //time_acc[num_ACC_points -1] = ((double*)bank_ph5->GetData64())[7];                                                                                                                             
 	            return true;
 	        }
