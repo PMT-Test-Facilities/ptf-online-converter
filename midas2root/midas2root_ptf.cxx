@@ -407,7 +407,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       // Optical box
 
       TGenericData *bank_ob0 = dataContainer.GetEventData<TGenericData>("OB10");
-      if(bank_ph0){
+      if(bank_ob0){
         num_opticalBox0_points++;
         opticalBox0_x0_acc[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[0];
         opticalBox0_y0_acc[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[1];
@@ -415,7 +415,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
         opticalBox0_x0_field[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[3];
         opticalBox0_y0_field[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[4];
         opticalBox0_z0_field[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[5];
-        opticalBox0_tot_field[num_opticalBox0_points -1] = ((double*)bank_ph0->GetData64())[6];    
+        opticalBox0_tot_field[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[6];    
         opticalBox0_tilt[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[7];
         opticalBox0_temp[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[10];    
         opticalBox0_hum[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[11];
