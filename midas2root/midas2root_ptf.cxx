@@ -427,14 +427,14 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       TGenericData *bank_tc0 = dataContainer.GetEventData<TGenericData>("TC00");
       if(bank_tc0){
         num_thermocouple0_points++;
-        thermocouple0_temp[num_thermocouple0_points -1] = ((double*)bank_tc0->GetData64())[0];
+        thermocouple0_temp[num_thermocouple0_points -1] = ((float*)bank_tc0->GetData64())[0];
         return true;
       }
 
       TGenericData *bank_tc1 = dataContainer.GetEventData<TGenericData>("TC01");
       if(bank_tc1){
         num_thermocouple1_points++;
-        thermocouple1_temp[num_thermocouple1_points -1] = ((double*)bank_tc1->GetData64())[0];
+        thermocouple1_temp[num_thermocouple1_points -1] = ((float*)bank_tc1->GetData64())[0];
         return true;
       }
 
