@@ -63,6 +63,9 @@ TBRBRawData::TBRBRawData(int bklen, int bktype, const char* name, void *pdata):
 	int index = i+21+istart;
 	uint32_t data = (fData[index] >> 4);
 	if(ch == 1 || ch == 3){ data = 4096 - data;}  // Swap polarity of data for channels 1 and 3.
+
+	// Swap the channel so that channel 0 is as marked on board as J0
+	ch = 3 - ch;
 	Samples[ch].push_back(data);
       }
 
