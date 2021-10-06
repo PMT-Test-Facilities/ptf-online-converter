@@ -336,15 +336,15 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     settings_tree->Branch("CalcBaseline",&calc_baseline,"CalcBaseline[20]/Double_t"); 
 
     // BRB Settings and readback
-    odb->RI("/Equipment/BRB/Settings/channel mask",&channel_mask);
+    odb->RI("/Equipment/BRB00/Settings/channel mask",&channel_mask);
         
     // PMT settings and readback
     std::vector<int> hv; // set point
-    odb->RIA("/Equipment/PMTS/Settings/HVset",&hv);
+    odb->RIA("/Equipment/PMTS00/Settings/HVset",&hv);
     std::vector<double> readback; // HV readback
-    odb->RDA("/Equipment/PMTS/Variables/PMV0",&readback);
+    odb->RDA("/Equipment/PMTS00/Variables/PMV0",&readback);
     std::vector<double> current; // HV readback
-    odb->RDA("/Equipment/PMTS/Variables/PMI0",&current);
+    odb->RDA("/Equipment/PMTS00/Variables/PMI0",&current);
     
     // Get calculated baseline
     std::vector<double> baseline; // HV readback
@@ -362,7 +362,10 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     }
 
     settings_tree->Fill();
+
+    std::cout << "Finished filling setting tree" << std::endl;
 #endif  // Done ifdef settings ttree filling
+
 
 
   }
