@@ -97,6 +97,9 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   // 9.Nov.2017 Let's try adding using channels 2,3,4, 5
   double V1730_wave0[nPoints_max][num_v1730_max],  V1730_wave1[nPoints_max][num_v1730_max],  V1730_wave2[nPoints_max][num_v1730_max], V1730_wave3[nPoints_max][num_v1730_max], V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max];
 
+  // Add a timestamp for each event. TL 2022-02-25 
+  double evt_timestamp[nPoints_max];
+
   //PMT readout
   int start_val_stat;
   int window_width;
@@ -150,6 +153,8 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("Start_time1",&Start_time1,"Start_time1[num_points_dig1]/Double_t");
     tree->Branch("Window_width0",&Window_width0,"Window_width0[num_points_dig0]/Double_t");
     tree->Branch("Window_width1",&Window_width1,"Window_width1[num_points_dig1]/Double_t");
+
+    tree->Branch("evt_timestamp",&evt_timestamp,"evt_timestamp[num_points]/Double_t");
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
     tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points][70]/Double_t"); //think of eqn* // SIZE OF COLUMN MUST MATCH num_v1730_max OR ELSE BANDING ISSUES WILL OCCUR
@@ -333,7 +338,8 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
           num_points++;
           
-          
+	  evt_timestamp[num_points-1] = (double)dataContainer.GetMidasEvent().GetTimeStamp();
+
           //std::cout << "point# "<< num_points << std::endl;
           
           std::vector<RawChannelMeasurement> measurements = v1730_b->GetMeasurements();
