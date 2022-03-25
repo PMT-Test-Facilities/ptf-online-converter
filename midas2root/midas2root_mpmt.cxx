@@ -32,6 +32,8 @@
   double x1_pos =  0.46, y1_pos = 0.38, z1_pos, tilt1_pos, rot1_pos;  //positions of gantry1
   double cyctime;
 
+
+
   //TODO: add other positions (Phidget, laser, ...)
 
   int num_phidg0_points;
@@ -72,6 +74,9 @@
   double V1730_wave0[nPoints_max][num_v1730_max],  V1730_wave1[nPoints_max][num_v1730_max],  V1730_wave2[nPoints_max][num_v1730_max], V1730_wave3[nPoints_max][num_v1730_max], V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max], V1730_wave6[nPoints_max][num_v1730_max], V1730_wave7[nPoints_max][num_v1730_max];
   double V1730_wave8[nPoints_max][num_v1730_max],  V1730_wave9[nPoints_max][num_v1730_max],  V1730_wave10[nPoints_max][num_v1730_max], V1730_wave11[nPoints_max][num_v1730_max], V1730_wave12[nPoints_max][num_v1730_max], V1730_wave13[nPoints_max][num_v1730_max], V1730_wave14[nPoints_max][num_v1730_max], V1730_wave15[nPoints_max][num_v1730_max];
   double V1730_wave16[nPoints_max][num_v1730_max],  V1730_wave17[nPoints_max][num_v1730_max],  V1730_wave18[nPoints_max][num_v1730_max], V1730_wave19[nPoints_max][num_v1730_max], V1730_wave20[nPoints_max][num_v1730_max], V1730_wave21[nPoints_max][num_v1730_max], V1730_wave22[nPoints_max][num_v1730_max], V1730_wave23[nPoints_max][num_v1730_max];
+
+  // Add a timestamp for each event. TL 2022-02-25
+  double evt_timestamp[nPoints_max];
 
   double temperatures[max_temp_sensor]; 
 
@@ -158,6 +163,8 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("Start_time1",&Start_time1,"Start_time1[num_points_dig1]/Double_t");
     tree->Branch("Window_width0",&Window_width0,"Window_width0[num_points_dig0]/Double_t");
     tree->Branch("Window_width1",&Window_width1,"Window_width1[num_points_dig1]/Double_t");
+
+    tree->Branch("evt_timestamp",&evt_timestamp,"evt_timestamp[num_points]/Double_t");
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
     for(int i =0; i < fNChan; i++){  // Save up to 24 waveforms
@@ -394,7 +401,9 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       if(num_points<nPoints_max){
         
         num_points++;
-        
+
+	evt_timestamp[num_points-1] = (double)dataContainer.GetMidasEvent().GetTimeStamp();
+	
         std::vector<RawBRBMeasurement> measures = brb_b->GetMeasurements();
         
         for(int i = 0; i < measures.size(); i++){           
