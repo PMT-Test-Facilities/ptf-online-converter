@@ -45,7 +45,7 @@ endif # ROOTSYS
 
 ifdef MIDASSYS
 
-MIDASLIBS = $(MIDASSYS)/linux/lib/libmidas.a -lutil -lrt
+MIDASLIBS = $(MIDASSYS)/lib/libmidas.a -lutil -lrt
 CXXFLAGS += -DHAVE_MIDAS -DOS_LINUX -Dextname -I$(MIDASSYS)/include
 
 UNAME := $(shell uname)
@@ -59,12 +59,15 @@ endif # MIDASSYS
 
 OBJS:= TTreeMaker.o TBRBRawData.o
 
-all: $(OBJS)  midas2root_ptf.exe midas2root_mpmt.exe eventDisplay.exe
+all: $(OBJS)  midas2root_ptf.exe midas2root_mpmt.exe eventDisplay.exe midas2root_mts.exe
 
 midas2root_ptf.exe: midas2root_ptf.cxx $(OBJS) 
 	$(CXX) -o $@ $(CXXFLAGS) $^ $(LIBS) $(ROOTGLIBS) -lm -lz -lpthread -lssl -lutil
 
 midas2root_mpmt.exe: midas2root_mpmt.cxx $(OBJS) 
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LIBS) $(ROOTGLIBS) -lm -lz -lpthread -lssl -lutil
+
+midas2root_mts.exe: midas2root_mts.cxx $(OBJS) 
 	$(CXX) -o $@ $(CXXFLAGS) $^ $(LIBS) $(ROOTGLIBS) -lm -lz -lpthread -lssl -lutil
 
 eventDisplay.exe: eventDisplay.cpp $(OBJS)
