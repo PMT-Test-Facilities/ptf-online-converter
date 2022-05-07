@@ -21,7 +21,7 @@
 
 
 
-#define nPoints_max 10000
+#define nPoints_max 6000
 #define num_phidg_max 10000
 #define max_temp_sensor 20
 #define num_v1730_max 1024 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
