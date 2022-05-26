@@ -123,6 +123,9 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   int ngoodTDCbanks;
   int nbadTDCbanks;
 
+  // cache the X and Y positions... only set at the start of the measurement cycle
+  float x_cache, y_cache;
+
   public:
 
   ScanToTreeConverter() {
@@ -369,6 +372,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     settings_tree->Fill();
 #endif  // Done ifdef settings ttree filling
 
+    x_cache = 0; y_cache = 0;
 
   }
 
@@ -383,17 +387,49 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
   bool ProcessMidasEvent(TDataContainer& dataContainer){
     
-    //    TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");  // END OF MOVE = START of MEASUREMENT
-    //if(bank){
-    // std::cout << "end " << std::endl;
-    // gbl_accept_banks = TRUE;
-    // return true;
-    //}
-    //bank = dataContainer.GetEventData<TGenericData>("BONM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
-    TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
+    // Check for cycle bank first.  Want to have the most up to date position to cache at start of measurement.
+    TGenericData *bank_cyc = dataContainer.GetEventData<TGenericData>("CYC0");
+    if(bank_cyc){ 
+      counter_gant = (int)((double*)bank_cyc->GetData64())[0];
+
+      //x0_pos = ((double*)bank_cyc->GetData64())[1];
+      //y0_pos = ((double*)bank_cyc->GetData64())[2];
+      x_cache = ((double*)bank_cyc->GetData64())[1];
+      y_cache = ((double*)bank_cyc->GetData64())[2];
+      z0_pos = ((double*)bank_cyc->GetData64())[3];
+      rot0_pos = ((double*)bank_cyc->GetData64())[4];
+      tilt0_pos = ((double*)bank_cyc->GetData64())[5];
+      x1_pos = ((double*)bank_cyc->GetData64())[6];
+      y1_pos = ((double*)bank_cyc->GetData64())[7];
+      z1_pos = ((double*)bank_cyc->GetData64())[8];
+      rot1_pos = ((double*)bank_cyc->GetData64())[9];
+      tilt1_pos = ((double*)bank_cyc->GetData64())[10];
+
+      std::cout << "CYC0 bank" << counter_gant << " X/Y = " << x0_pos << " " << y0_pos << " " 
+		<< time << " " << ((double*)bank_cyc->GetData64())[11] 
+		<< std::endl;
+
+    }
+
+    TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");  // END OF MOVE = START of MEASUREMENT
+    if(bank){
+      std::cout << "end of move" << std::endl;
+      // Cache the X/Y position at this time.  Want to use this position for the bank data
+      x0_pos = x_cache;
+      y0_pos = y_cache;
+      std::cout << "XY/ " <<  x0_pos  << " " << y0_pos << " with"
+		<< num_points << " events" << std::endl;
+      gbl_accept_banks = TRUE;
+      return true;
+    }
+    bank = dataContainer.GetEventData<TGenericData>("BONM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
+    //TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
     if(bank){
 
-      std::cout << "end of move" << std::endl;
+      std::cout << "start of next move" << std::endl;
+      std::cout << "Filling scanpoint # X/Y = " << x0_pos  << " " << y0_pos << " with"
+		<< num_points << " events" << std::endl;
+
       tree->Fill();
       counter = 0;
       num_points = 0;
@@ -403,59 +439,61 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       num_phidg1_points = 0;
       num_phidg3_points = 0;
       num_phidg4_points = 0;
-
+      
       gbl_accept_banks = FALSE;
       return true;
     }
 
 
-    //attempt at adding digitizer data
+    //attempt at adding digitizer data (only if we aren't moving)
     
-    // Get BRB data
-    TBRBRawData *brb_b = dataContainer.GetEventData<TBRBRawData>("BRB0");
-    
-    if(brb_b){      
+    if(gbl_accept_banks){
+      // Get BRB data
+      TBRBRawData *brb_b = dataContainer.GetEventData<TBRBRawData>("BRB0");
       
-      if(num_points<nPoints_max){
-        
-        num_points++;
-
-	evt_timestamp[num_points-1] = (double)dataContainer.GetMidasEvent().GetTimeStamp();
+      if(brb_b){      
 	
-        std::vector<RawBRBMeasurement> measures = brb_b->GetMeasurements();
-        
-        for(int i = 0; i < measures.size(); i++){           
-          int chan = measures[i].GetChannel();
-          for(int ib = 0; ib < measures[i].GetNSamples(); ib++){
-            if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
-            if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
-            if(chan == 2) V1730_wave2[num_points-1][ib] = measures[i].GetSample(ib);  
-            if(chan == 3) V1730_wave3[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 4) V1730_wave4[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 5) V1730_wave5[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 6) V1730_wave6[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 7) V1730_wave7[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 8) V1730_wave8[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 9) V1730_wave9[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 10) V1730_wave10[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 11) V1730_wave11[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 12) V1730_wave12[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 13) V1730_wave13[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 14) V1730_wave14[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 15) V1730_wave15[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 16) V1730_wave16[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 17) V1730_wave17[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 18) V1730_wave18[num_points-1][ib] = measures[i].GetSample(ib);
-            if(chan == 19) V1730_wave19[num_points-1][ib] = measures[i].GetSample(ib);
-          }              
-        }	      
-        
-      }else{
-        std::cout << "Too many points! " << num_points << std::endl;
+	if(num_points<nPoints_max){
+	  
+	  num_points++;
+	  
+	  evt_timestamp[num_points-1] = (double)dataContainer.GetMidasEvent().GetTimeStamp();
+	  
+	  std::vector<RawBRBMeasurement> measures = brb_b->GetMeasurements();
+	  
+	  for(int i = 0; i < measures.size(); i++){           
+	    int chan = measures[i].GetChannel();
+	    for(int ib = 0; ib < measures[i].GetNSamples(); ib++){
+	      if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
+	      if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
+	      if(chan == 2) V1730_wave2[num_points-1][ib] = measures[i].GetSample(ib);  
+	      if(chan == 3) V1730_wave3[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 4) V1730_wave4[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 5) V1730_wave5[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 6) V1730_wave6[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 7) V1730_wave7[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 8) V1730_wave8[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 9) V1730_wave9[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 10) V1730_wave10[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 11) V1730_wave11[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 12) V1730_wave12[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 13) V1730_wave13[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 14) V1730_wave14[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 15) V1730_wave15[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 16) V1730_wave16[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 17) V1730_wave17[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 18) V1730_wave18[num_points-1][ib] = measures[i].GetSample(ib);
+	      if(chan == 19) V1730_wave19[num_points-1][ib] = measures[i].GetSample(ib);
+	    }              
+	  }	      
+	  
+	}else{
+	  std::cout << "Too many points! " << num_points << std::endl;
+	}
+	
+	return true;
       }
-      
-      return true;
-    }
+    } 
 
     TGenericData *envt = dataContainer.GetEventData<TGenericData>("BRT0");
     if(envt){
@@ -469,29 +507,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 		<< temperatures[2] << std::endl; 
     }
 
-    //Grab the gantry bank 
-    TGenericData *bank_cyc = dataContainer.GetEventData<TGenericData>("CYC0");
-    if(bank_cyc){ 
-      counter_gant = (int)((double*)bank_cyc->GetData64())[0];
 
-      x0_pos = ((double*)bank_cyc->GetData64())[1];
-      y0_pos = ((double*)bank_cyc->GetData64())[2];
-      z0_pos = ((double*)bank_cyc->GetData64())[3];
-      rot0_pos = ((double*)bank_cyc->GetData64())[4];
-      tilt0_pos = ((double*)bank_cyc->GetData64())[5];
-      x1_pos = ((double*)bank_cyc->GetData64())[6];
-      y1_pos = ((double*)bank_cyc->GetData64())[7];
-      z1_pos = ((double*)bank_cyc->GetData64())[8];
-      rot1_pos = ((double*)bank_cyc->GetData64())[9];
-      tilt1_pos = ((double*)bank_cyc->GetData64())[10];
-
-      //      time = ((double*)bank_cyc->GetData64())[11];
-
-      std::cout << counter_gant << " " << x0_pos << " " << y0_pos << " " 
-		<< time << " " << ((double*)bank_cyc->GetData64())[11] 
-		<< std::endl;
-
-    }
 
 
     TGenericData *tmp0 = dataContainer.GetEventData<TGenericData>("TMP0");
@@ -500,7 +516,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 	temperatures[i+8] = ((double*)tmp0->GetData64())[i];
       }
     
-      std::cout << "Phidget temperatures: " 
+      if(0)      std::cout << "Phidget temperatures: " 
 		<< temperatures[8] << " " 
 		<< temperatures[9] << " " 
 		<< temperatures[10] << " " 
