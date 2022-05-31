@@ -57,7 +57,7 @@ LIBS += $(MIDASLIBS)
 
 endif # MIDASSYS
 
-OBJS:= TTreeMaker.o TBRBRawData.o
+OBJS:= TTreeMaker.o TBRBRawData.o TBRBRawDataMTS.o
 
 all: $(OBJS)  midas2root_ptf.exe midas2root_mpmt.exe eventDisplay.exe midas2root_mts.exe
 

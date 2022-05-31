@@ -9,7 +9,7 @@
 #include "TV1190Data.hxx"
 #include "TV792Data.hxx"
 #include "TV1730RawData.hxx"
-#include "TBRBRawData.hxx"
+#include "TBRBRawDataMTS.hxx"
 #include "TCanvas.h"
 #include "TTreeMaker.h"
 
@@ -449,7 +449,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     
     if(gbl_accept_banks){
       // Get BRB data
-      TBRBRawData *brb_b = dataContainer.GetEventData<TBRBRawData>("BRB0");
+      TBRBRawDataMTS *brb_b = dataContainer.GetEventData<TBRBRawDataMTS>("BRB0");
       
       if(brb_b){      
 	
