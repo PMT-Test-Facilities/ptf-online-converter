@@ -31,7 +31,7 @@ TBRBRawData::TBRBRawData(int bklen, int bktype, const char* name, void *pdata):
   
   //  std::cout << "_________________________________________" << std::endl;
 
-  int nadcs = ((npackets - 1))/8;
+  int nadcs = ((npackets - 1))/4;
   
   for(int adc =0; adc < nadcs; adc++){ // loop over ADCs
 
@@ -39,10 +39,10 @@ TBRBRawData::TBRBRawData(int bklen, int bktype, const char* name, void *pdata):
     std::vector<std::vector<uint32_t> >Samples;
     for(int ch = 0; ch < 4; ch++){ Samples.push_back(std::vector<uint32_t>());}
 
-    for(int p = 0; p < 8; p++){ // loop over packets// now 1024 samples hopefully
+    for(int p = 0; p < 4; p++){ // loop over packets// now 1024 samples hopefully
       //for(int p = 0; p < 4; p++){ // loop over packets
 
-      int counter = adc*8 + p;
+      int counter = adc*4 + p;
       int istart = counter*533;
 
       int frameid = fData[istart + 4];
