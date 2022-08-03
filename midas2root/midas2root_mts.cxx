@@ -452,7 +452,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       TBRBRawDataMTS *brb_b = dataContainer.GetEventData<TBRBRawDataMTS>("BRB0");
       
       if(brb_b){      
-	
+	if(0)std::cout <<"have BRB bank " << num_points << " " << nPoints_max << std::endl;
 	if(num_points<nPoints_max){
 	  
 	  num_points++;
@@ -460,9 +460,15 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 	  evt_timestamp[num_points-1] = (double)dataContainer.GetMidasEvent().GetTimeStamp();
 	  
 	  std::vector<RawBRBMeasurement> measures = brb_b->GetMeasurements();
-	  
+	  //  std::cout << " Number of channels: " << measures.size() << std::endl;
 	  for(int i = 0; i < measures.size(); i++){           
 	    int chan = measures[i].GetChannel();
+
+	    if(0)std::cout << "Waveform chan " << chan << " has samples " << measures[i].GetSample(0) << " " 
+<< measures[i].GetSample(1) << " " 
+<< measures[i].GetSample(2) << " " 
+<< measures[i].GetSample(3) << " " 
+		      << measures[i].GetSample(4) << std::endl;
 	    for(int ib = 0; ib < measures[i].GetNSamples(); ib++){
 	      if(chan == 0) V1730_wave0[num_points-1][ib] = measures[i].GetSample(ib);  
 	      if(chan == 1) V1730_wave1[num_points-1][ib] = measures[i].GetSample(ib);  
