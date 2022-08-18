@@ -24,7 +24,7 @@
 #define nPoints_max 10000
 #define num_phidg_max 10000
 #define max_temp_sensor 20
-#define num_v1730_max 40 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
+#define num_v1730_max 50 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
 
   int counter_gant;                                    //n-th measurement
   int subevent;

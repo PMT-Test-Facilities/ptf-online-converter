@@ -19,7 +19,7 @@ TBRBRawDataMTS::TBRBRawDataMTS(int bklen, int bktype, const char* name, void *pd
   uint16_t* fData = reinterpret_cast<uint16_t*>(pdata);
 
   int nwords = bklen;
-  int npackets = bklen / 181;
+  int npackets = bklen / 221;
   if(0)std::cout << "Number of words: " << nwords
             << ", number of packets : " << npackets << std::endl;
   
@@ -43,7 +43,7 @@ TBRBRawDataMTS::TBRBRawDataMTS(int bklen, int bktype, const char* name, void *pd
     for(int p = 0; p < 1; p++){ // loop over packets
 
       int counter = adc + p;
-      int istart = counter*181;
+      int istart = counter*221;
 
       int frameid = fData[istart + 4];
       int packetid = fData[istart + 2];
@@ -58,7 +58,7 @@ TBRBRawDataMTS::TBRBRawDataMTS(int bklen, int bktype, const char* name, void *pd
       // Save data samples; data for 4 channels is interleaved
       // need to convert between ADC channel number and connector channel number
       int chan_map[4] = {2,3,0,1};
-      for(int i = 0; i < 160; i++){
+      for(int i = 0; i < 200; i++){
 	int ch = chan_map[i%4];  // which channel?
 	int index = i+21+istart; 
 	uint32_t data = (fData[index] >> 4);
