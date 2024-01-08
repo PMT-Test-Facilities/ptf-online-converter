@@ -10,7 +10,7 @@
 #include "TV792Data.hxx"
 #include "TV1730RawData.hxx"
 #include "TCanvas.h"
-
+#include "TTreeMaker.h"
 #include <TTree.h>
 #include <TFile.h>
 
@@ -21,7 +21,7 @@
 #define num_phidg_max 10000
 #define max_temp_sensor 20
 #define num_v1730_max 70 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
-#define timeStart 130 // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 70 samples.
+#define timeStart 100 // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 70 samples.
 
 // Offset for the ADC channel number
 #define Ch_Offset 1
@@ -50,6 +50,27 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   double x0_pos, y0_pos, z0_pos, tilt0_pos, rot0_pos;  //positions of gantry0
   double x1_pos, y1_pos, z1_pos, tilt1_pos, rot1_pos;  //positions of gantry1
   double time;
+
+  int num_opticalBox0_points;
+  double opticalBox0_x0_field[num_phidg_max], opticalBox0_y0_field[num_phidg_max], opticalBox0_z0_field[num_phidg_max], opticalBox0_tot_field[num_phidg_max];     //B-field from phidget0
+  double opticalBox0_tilt[num_phidg_max];                       //tilt position from optical box spatial phidget
+  double opticalBox0_temp[num_phidg_max];                       //temperature of optical box humididty phidget
+  double opticalBox0_hum[num_phidg_max];                       //humididty of optical box humididty phidget
+  double opticalBox0_x0_acc[num_phidg_max], opticalBox0_y0_acc[num_phidg_max], opticalBox0_z0_acc[num_phidg_max];
+
+    int num_opticalBox1_points;
+  double opticalBox1_x0_field[num_phidg_max], opticalBox1_y0_field[num_phidg_max], opticalBox1_z0_field[num_phidg_max], opticalBox1_tot_field[num_phidg_max];     //B-field from phidget0
+  double opticalBox1_tilt[num_phidg_max];                       //tilt position from optical box spatial phidget
+  double opticalBox1_x0_acc[num_phidg_max], opticalBox1_y0_acc[num_phidg_max], opticalBox1_z0_acc[num_phidg_max];
+
+    int num_opticalBox2_points;
+  double opticalBox2_x0_field[num_phidg_max], opticalBox2_y0_field[num_phidg_max], opticalBox2_z0_field[num_phidg_max], opticalBox2_tot_field[num_phidg_max];     //B-field from phidget0
+  double opticalBox2_tilt[num_phidg_max];                       //tilt position from optical box spatial phidget
+  double opticalBox2_x0_acc[num_phidg_max], opticalBox2_y0_acc[num_phidg_max], opticalBox2_z0_acc[num_phidg_max];
+
+  int num_thermocouple0_points;
+  int num_thermocouple1_points;
+  double thermocouple0_temp[num_phidg_max], thermocouple1_temp[num_phidg_max];                //from thermocouple 0/1
 
   //TODO: add other positions (Phidget, laser, ...)
 
@@ -180,6 +201,46 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 	tree->Branch("phidgACC_Ay",acc0_y0,"phidgACC_Ay[num_ACC_points]/Double_t");
 	 tree->Branch("phidgACC_Az",acc0_z0,"phidgACC_Az[num_ACC_points]/Double_t");
 	
+    //optical box
+    tree->Branch("num_opticalBox0_points",&num_opticalBox0_points,"num_opticalBox0_points/Int_t");
+    tree->Branch("opticalBox0_Ax",opticalBox0_x0_acc,"opticalBox0_Ax[num_opticalBox0_points]/Double_t");
+    tree->Branch("opticalBox0_Ay",opticalBox0_y0_acc,"opticalBox0_Ay[num_opticalBox0_points]/Double_t");
+    tree->Branch("opticalBox0_Az",opticalBox0_z0_acc,"opticalBox0_Az[num_opticalBox0_points]/Double_t");
+    tree->Branch("opticalBox0_Bx",opticalBox0_x0_field,"opticalBox0_Bx[num_opticalBox0_points]/Double_t");
+    tree->Branch("opticalBox0_By",opticalBox0_y0_field,"opticalBox0_By[num_opticalBox0_points]/Double_t");
+    tree->Branch("opticalBox0_Bz",opticalBox0_z0_field,"opticalBox0_Bz[num_opticalBox0_points]/Double_t");
+    tree->Branch("opticalBox0_Btot",opticalBox0_tot_field,"opticalBox0_Btot[num_opticalBox0_points]/Double_t");
+    tree->Branch("opticalBox0_tilt",opticalBox0_tilt,"opticalBox0_tilt[num_opticalBox0_points]/Double_t");
+    tree->Branch("opticalBox0_temp",opticalBox0_temp,"opticalBox0_temp[num_opticalBox0_points]/Double_t");
+    tree->Branch("opticalBox0_hum",opticalBox0_hum,"opticalBox0_hum[num_opticalBox0_points]/Double_t");
+
+    tree->Branch("num_opticalBox1_points",&num_opticalBox1_points,"num_opticalBox1_points/Int_t");
+    tree->Branch("opticalBox1_Ax",opticalBox1_x0_acc,"opticalBox1_Ax[num_opticalBox1_points]/Double_t");
+    tree->Branch("opticalBox1_Ay",opticalBox1_y0_acc,"opticalBox1_Ay[num_opticalBox1_points]/Double_t");
+    tree->Branch("opticalBox1_Az",opticalBox1_z0_acc,"opticalBox1_Az[num_opticalBox1_points]/Double_t");
+    tree->Branch("opticalBox1_Bx",opticalBox1_x0_field,"opticalBox1_Bx[num_opticalBox1_points]/Double_t");
+    tree->Branch("opticalBox1_By",opticalBox1_y0_field,"opticalBox1_By[num_opticalBox1_points]/Double_t");
+    tree->Branch("opticalBox1_Bz",opticalBox1_z0_field,"opticalBox1_Bz[num_opticalBox1_points]/Double_t");
+    tree->Branch("opticalBox1_Btot",opticalBox1_tot_field,"opticalBox1_Btot[num_opticalBox1_points]/Double_t");
+    tree->Branch("opticalBox1_tilt",opticalBox1_tilt,"opticalBox1_tilt[num_opticalBox1_points]/Double_t");
+
+    tree->Branch("num_opticalBox2_points",&num_opticalBox2_points,"num_opticalBox2_points/Int_t");
+    tree->Branch("opticalBox2_Ax",opticalBox2_x0_acc,"opticalBox2_Ax[num_opticalBox2_points]/Double_t");
+    tree->Branch("opticalBox2_Ay",opticalBox2_y0_acc,"opticalBox2_Ay[num_opticalBox2_points]/Double_t");
+    tree->Branch("opticalBox2_Az",opticalBox2_z0_acc,"opticalBox2_Az[num_opticalBox2_points]/Double_t");
+    tree->Branch("opticalBox2_Bx",opticalBox2_x0_field,"opticalBox2_Bx[num_opticalBox2_points]/Double_t");
+    tree->Branch("opticalBox2_By",opticalBox2_y0_field,"opticalBox2_By[num_opticalBox2_points]/Double_t");
+    tree->Branch("opticalBox2_Bz",opticalBox2_z0_field,"opticalBox2_Bz[num_opticalBox2_points]/Double_t");
+    tree->Branch("opticalBox2_Btot",opticalBox2_tot_field,"opticalBox2_Btot[num_opticalBox2_points]/Double_t");
+    tree->Branch("opticalBox2_tilt",opticalBox2_tilt,"opticalBox2_tilt[num_opticalBox2_points]/Double_t");
+
+    //thermocouples
+    tree->Branch("num_thermocouple0_points",&num_thermocouple0_points,"num_thermocouple0_points/Int_t");
+    tree->Branch("thermocouple0_temp",thermocouple0_temp,"thermocouple0_temp[num_thermocouple0_points]/Double_t");
+
+    tree->Branch("num_thermocouple1_points",&num_thermocouple1_points,"num_thermocouple1_points/Int_t");
+    tree->Branch("thermocouple1_temp",thermocouple1_temp,"thermocouple1_temp[num_thermocouple1_points]/Double_t");
+  
 
     //field-related phidget measurements
     tree->Branch("num_phidg0_points",&num_phidg0_points,"num_phidg0_points/Int_t");
@@ -294,14 +355,17 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   }
 
   bool ProcessMidasEvent(TDataContainer& dataContainer){
-    TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");  // END OF MOVE = START of MEASUREMENT
-    if(bank){
-      std::cout << "end " << std::endl;
-      gbl_accept_banks = TRUE;
-      return true;
-    }
-    bank = dataContainer.GetEventData<TGenericData>("BONM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
-    if(bank){
+
+        //TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");  // END OF MOVE = START of MEASUREMENT
+    
+    //if(bank){
+    //  std::cout << "end " << std::endl;
+    gbl_accept_banks = TRUE;
+    //return true;
+    //}
+    //bank = dataContainer.GetEventData<TGenericData>("BONM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
+    
+    //if(bank){
 	  timestamp=dataContainer.GetMidasData().GetTimeStamp();//this is where we fill the tree for the time
       std::cout << "end of move" << std::endl;
       tree->Fill();
@@ -309,14 +373,20 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       num_points = 0;
       num_points_dig0 = 0;
       num_points_dig1 = 0;
+      num_opticalBox0_points = 0;
+      num_opticalBox1_points = 0;
+      num_opticalBox2_points = 0;
+      num_thermocouple0_points = 0;
+      num_thermocouple1_points = 0;
+      num_opticalBox2_points = 0;
       num_phidg0_points = 0;
       num_phidg1_points = 0;
       num_phidg3_points = 0;
       num_phidg4_points = 0;
 	  num_ACC_points = 0;
-      gbl_accept_banks = FALSE;
-      return true;
-    }
+    //  gbl_accept_banks = FALSE;
+    //  return true;
+    //}
     if(gbl_accept_banks){
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //attempt at adding digitizer data
@@ -328,7 +398,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       // Try getting V1730 bank
       // Uncomment channels to get respective ROOT output from the file
       TV1730RawData *v1730_b = dataContainer.GetEventData<TV1730RawData>("V730");
-      //printf("Decoded V1730 data\n");
+      printf("Decoded V1730 data\n");
 
       if(v1730_b){      
 
@@ -347,8 +417,8 @@ class ScanToTreeConverter: public TRootanaEventLoop {
           for(int i = 0; i < measurements.size(); i++){
             
             int chan = measurements[i].GetChannel();
-            //std::cout << "chan " << chan << std::endl;
-            if(chan < 0 || chan >5) continue; // 9.Nov.2017 updated for first 5 channels only
+            std::cout << "chan " << chan << std::endl;
+            if(chan >5) continue; // 9.Nov.2017 updated for first 5 channels only
             //		  std::cout << "chan " << chan << std::endl;
             
             // saves num_v1730_max (currently 70) bins around each pulse
@@ -376,6 +446,68 @@ class ScanToTreeConverter: public TRootanaEventLoop {
             }		             	      
           }
         }
+        return true;
+      }
+
+      // Optical box
+      
+      TGenericData *bank_ob0 = dataContainer.GetEventData<TGenericData>("OB10");
+      if(bank_ob0){
+        num_opticalBox0_points++;
+        opticalBox0_x0_acc[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[0];
+        opticalBox0_y0_acc[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[1];
+        opticalBox0_z0_acc[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[2];
+        opticalBox0_x0_field[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[3];
+        opticalBox0_y0_field[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[4];
+        opticalBox0_z0_field[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[5];
+        opticalBox0_tot_field[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[6];    
+        opticalBox0_tilt[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[7];
+        opticalBox0_temp[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[10];    
+        opticalBox0_hum[num_opticalBox0_points -1] = ((double*)bank_ob0->GetData64())[11];
+        //return true;
+      }
+
+      TGenericData *bank_ob1 = dataContainer.GetEventData<TGenericData>("OB11");
+      if(bank_ob1){
+        num_opticalBox1_points++;
+        opticalBox1_x0_acc[num_opticalBox1_points -1] = ((double*)bank_ob1->GetData64())[0];
+        opticalBox1_y0_acc[num_opticalBox1_points -1] = ((double*)bank_ob1->GetData64())[1];
+        opticalBox1_z0_acc[num_opticalBox1_points -1] = ((double*)bank_ob1->GetData64())[2];
+        opticalBox1_x0_field[num_opticalBox1_points -1] = ((double*)bank_ob1->GetData64())[3];
+        opticalBox1_y0_field[num_opticalBox1_points -1] = ((double*)bank_ob1->GetData64())[4];
+        opticalBox1_z0_field[num_opticalBox1_points -1] = ((double*)bank_ob1->GetData64())[5];
+        opticalBox1_tot_field[num_opticalBox1_points -1] = ((double*)bank_ob1->GetData64())[6];    
+        opticalBox1_tilt[num_opticalBox1_points -1] = ((double*)bank_ob1->GetData64())[7];
+        //return true;
+      }
+
+      TGenericData *bank_ob2 = dataContainer.GetEventData<TGenericData>("OB12");
+      if(bank_ob2){
+        num_opticalBox2_points++;
+        opticalBox2_x0_acc[num_opticalBox2_points -1] = ((double*)bank_ob2->GetData64())[0];
+        opticalBox2_y0_acc[num_opticalBox2_points -1] = ((double*)bank_ob2->GetData64())[1];
+        opticalBox2_z0_acc[num_opticalBox2_points -1] = ((double*)bank_ob2->GetData64())[2];
+        opticalBox2_x0_field[num_opticalBox2_points -1] = ((double*)bank_ob2->GetData64())[3];
+        opticalBox2_y0_field[num_opticalBox2_points -1] = ((double*)bank_ob2->GetData64())[4];
+        opticalBox2_z0_field[num_opticalBox2_points -1] = ((double*)bank_ob2->GetData64())[5];
+        opticalBox2_tot_field[num_opticalBox2_points -1] = ((double*)bank_ob2->GetData64())[6];    
+        opticalBox2_tilt[num_opticalBox2_points -1] = ((double*)bank_ob2->GetData64())[7];
+        //return true;
+      }
+
+      // Thermocouples
+
+      TGenericData *bank_tc0 = dataContainer.GetEventData<TGenericData>("TC00");
+      if(bank_tc0){
+        num_thermocouple0_points++;
+        thermocouple0_temp[num_thermocouple0_points -1] = ((float*)bank_tc0->GetData64())[0];
+        return true;
+      }
+
+      TGenericData *bank_tc1 = dataContainer.GetEventData<TGenericData>("TC01");
+      if(bank_tc1){
+        num_thermocouple1_points++;
+        thermocouple1_temp[num_thermocouple1_points -1] = ((float*)bank_tc1->GetData64())[0];
         return true;
       }
 
