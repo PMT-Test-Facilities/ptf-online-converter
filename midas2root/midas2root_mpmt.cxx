@@ -342,32 +342,95 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     double calc_baseline[20];    
     settings_tree->Branch("CalcBaseline",&calc_baseline,"CalcBaseline[20]/Double_t"); 
 
+    std::vector<std::string> mycins;
+    //    for(int i = 0; i < 20; i++){ mycins->push_back(std::string("")); }
+    //settings_tree->Branch("CIN",&mycins); 
+    //std::string a_string("blah");
+
+
+
     // BRB Settings and readback
     odb->RI("/Equipment/BRB/Settings/channel mask",&channel_mask);
         
     std::cout << "Read values "<< std::endl;
     // PMT settings and readback
     std::vector<int> hv; // set point
-    odb->RIA("/Equipment/PMTS01/Settings/HVset",&hv);
+    odb->RIA("/Equipment/PMTS08/Settings/HVset",&hv);
+    std::cout << "Read values "<< std::endl;
     std::vector<double> readback; // HV readback
-    odb->RDA("/Equipment/PMTS01/Variables/PMV1",&readback);
+    std::cout << "Read values "<< std::endl;
+    odb->RDA("/Equipment/PMTS08/Variables/PMV8",&readback);
     std::vector<double> current; // HV readback
-    odb->RDA("/Equipment/PMTS01/Variables/PMI1",&current);
+    std::cout << "Read values 5"<< std::endl;
+    odb->RDA("/Equipment/PMTS08/Variables/PMI8",&current);
     
+
     // Get calculated baseline
     std::vector<double> baseline; // HV readback
     odb->RDA("/Analyzer/Baselines/Baseline",&baseline);
+    std::cout << "Read values 6"<< std::endl;
+    // Get CIN
+    std::vector<std::string> cin;
+ 
+    odb->RSA("/Analyzer/PMT_List",&cin);
+    std::cout << "Read values "<< std::endl;
+    for(int i = 0; i < 20; i++){
+      printf("%i : CIN: %s ; HV = %i \n",i,cin[i].c_str(), hv[i]);
+    }
     
-    
+        std::cout << "Read values 7"<< std::endl;
     // Stupidly need to copy from vector to array, I think
     for(int i = 0; i < 20; i++){
       HVsetpoints[i] = hv[i];
       HVreadback[i] = readback[i];
       HVcurrent[i] = current[i];
       calc_baseline[i] = baseline[i];
-
+      //      (*mycins)[i] = cin[i];
       std::cout << "Baseline " << i << "  "<< baseline[i] << " " << calc_baseline[i] << std::endl;
     }
+
+    // Save CIN
+
+    std::string cin0(cin[0]);
+    settings_tree->Branch("CIN0", &cin0); 
+    std::string cin1(cin[1]);
+    settings_tree->Branch("CIN1", &cin1); 
+    std::string cin2(cin[2]);
+    settings_tree->Branch("CIN2", &cin2); 
+    std::string cin3(cin[3]);
+    settings_tree->Branch("CIN3", &cin3); 
+    std::string cin4(cin[4]);
+    settings_tree->Branch("CIN4", &cin4); 
+    std::string cin5(cin[5]);
+    settings_tree->Branch("CIN5", &cin5); 
+    std::string cin6(cin[6]);
+    settings_tree->Branch("CIN6", &cin6); 
+    std::string cin7(cin[7]);
+    settings_tree->Branch("CIN7", &cin7); 
+    std::string cin8(cin[8]);
+    settings_tree->Branch("CIN8", &cin8); 
+    std::string cin9(cin[9]);
+    settings_tree->Branch("CIN9", &cin9); 
+    std::string cin10(cin[10]);
+    settings_tree->Branch("CIN10", &cin10); 
+    std::string cin11(cin[11]);
+    settings_tree->Branch("CIN11", &cin11); 
+    std::string cin12(cin[12]);
+    settings_tree->Branch("CIN12", &cin12); 
+    std::string cin13(cin[13]);
+    settings_tree->Branch("CIN13", &cin13); 
+    std::string cin14(cin[14]);
+    settings_tree->Branch("CIN14", &cin14); 
+    std::string cin15(cin[15]);
+    settings_tree->Branch("CIN15", &cin15); 
+    std::string cin16(cin[16]);
+    settings_tree->Branch("CIN16", &cin16); 
+    std::string cin17(cin[17]);
+    settings_tree->Branch("CIN17", &cin17); 
+    std::string cin18(cin[18]);
+    settings_tree->Branch("CIN18", &cin18); 
+    std::string cin19(cin[19]);
+    settings_tree->Branch("CIN19", &cin19); 
 
     settings_tree->Fill();
 #endif  // Done ifdef settings ttree filling
