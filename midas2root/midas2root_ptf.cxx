@@ -21,7 +21,7 @@
 #define num_phidg_max 10000
 #define max_temp_sensor 20
 #define num_v1730_max 70 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
-#define timeStart 110 // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 70 samples.
+#define timeStart 110 // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 400 samples.
 
 // Offset for the ADC channel number
 #define Ch_Offset 1
@@ -160,11 +160,11 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
     tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points][70]/D"); //think of eqn* // SIZE OF COLUMN MUST MATCH num_v1730_max OR ELSE BANDING ISSUES WILL OCCUR
-    tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][70]/D"); //think of eqn*
+    //tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][400]/D"); //think of eqn*
     tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points][70]/D"); //think of eqn*
-    tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][70]/D"); 
-    tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][70]/D");
-    tree->Branch("V1730_wave5",&V1730_wave5,"V1730_wave5[num_points][70]/D");
+    //tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][400]/D"); 
+    //tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][400]/D");
+    //tree->Branch("V1730_wave5",&V1730_wave5,"V1730_wave5[num_points][400]/D");
     //tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points]/D"); //think of eqn*
     //tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points]/D"); //think of eqn*
     //tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points]/D"); //think of eqn*
@@ -297,7 +297,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
   bool ProcessMidasEvent(TDataContainer& dataContainer){
     if (!tree){
-      initialize_tree(5611);
+      initialize_tree(5614);
     }
     
     TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");  // END OF MOVE = START of MEASUREMENT
@@ -310,10 +310,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     if(bank){
 	    timestamp=dataContainer.GetMidasData().GetTimeStamp();//this is where we fill the tree for the time
       tree->Fill();
-      std::cout << "Started move. gantry position counter:  " << counter_gant
-      << " position: " << x0_pos << " " << y0_pos << " " << z0_pos
-      << " number digi events " << num_points << std::endl;
-
+     
       counter = 0;
       num_points = 0;
       num_points_dig0 = 0;
@@ -363,7 +360,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
             if(chan < 0 || chan >5) continue; // 9.Nov.2017 updated for first 5 channels only
             //		  std::cout << "chan " << chan << std::endl;
             
-            // saves num_v1730_max (currently 70) bins around each pulse
+            // saves num_v1730_max (currently 400) bins around each pulse
             // laser pulse is given an offset as it occurs earlier in time
             // Note: 1 ib  = 2 ns
             // This is what writes Midas data to the ROOT tree
@@ -375,21 +372,18 @@ class ScanToTreeConverter: public TRootanaEventLoop {
             // 3          Gantry0 monitor PMT
             // 4          Gantry1 receiver PMT
             // 5          Gantry1 monitor PMT
+
+            //std::cout <<measurements[i].GetNSamples() << " samples "<<std::endl; 
             
             for(int ib = timeStart; ib < measurements[i].GetNSamples() && ib  < num_v1730_max + timeStart ; ib++){
               
               //std::cout<<"ib = " <<ib <<std::endl;
               
-              if(chan == 0){ 
-                  V1730_wave0[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
-		              if(measurements[i].GetSample(ib) < 7900){ 
-                    pmt_hit = true; std::cout << "PMT hit " << std::endl;
-		              }
-	            }
-              if(chan == 1) V1730_wave1[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-timeStart); // -130 is the timeStart offset, meaning the reference signal window starts at the start of the digitizer readout
-              if(chan == 2) V1730_wave2[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-timeStart);
-              if(chan == 3) V1730_wave3[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
-              if(chan == 5) V1730_wave5[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
+              if(chan == 0) V1730_wave0[num_points-1][ib-timeStart] = measurements[i].GetSample(ib+89);
+              //if(chan == 1) V1730_wave1[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-timeStart); // -130 is the timeStart offset, meaning the reference signal window starts at the start of the digitizer readout
+              if(chan == 2) V1730_wave2[num_points-1][ib-timeStart] = measurements[i].GetSample(i+40);
+              //if(chan == 3) V1730_wave3[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
+             // if(chan == 5) V1730_wave5[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
             }		             	      
           }
         }else{
