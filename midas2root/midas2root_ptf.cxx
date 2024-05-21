@@ -14,17 +14,15 @@
 #include <TTree.h>
 #include <TFile.h>
 
-#define TRUE 1
-#define FALSE 0
-
-#define nPoints_max 6000 // John 2019-11-05 Reduced from 1000000
-#define num_phidg_max 10000
-#define max_temp_sensor 20
-#define num_v1730_max 140 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
-#define timeStart 110 // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 400 samples.
+const int nPoints_max = 6000;
+const int num_phidg_max = 10000;
+const int max_temp_sensor = 20;
+const int num_v1730_max = 140; // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
+const int timeStart = 110; // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 400 samples.
 
 // Offset for the ADC channel number
-#define Ch_Offset 1
+const int Ch_Offset = 1;
+
 
 // Flag to indicate the gantry was not moving and to record ADC and Phidget values. 
 bool gbl_accept_banks = false; //set FALSE
