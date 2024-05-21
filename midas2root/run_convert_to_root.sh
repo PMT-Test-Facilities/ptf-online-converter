@@ -33,7 +33,7 @@ do
     
 
 
-  $cmd $ifile $RETVAL
+  $cmd $ifile $RETVAL $1
   RETVAL="$?"
   echo "moving output000${strRun}.root to tmp${basename}.root" 
   mv output000${strRun}.root tmp_${basename}.root
