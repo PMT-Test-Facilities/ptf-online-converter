@@ -14,7 +14,7 @@
 #include <TTree.h>
 #include <TFile.h>
 
-const int nPoints_max = 6000;
+const int nPoints_max = 6000; // 24000*100;
 const int num_phidg_max = 10000;
 const int max_temp_sensor = 20;
 const int num_v1730_max = 140; // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
@@ -26,7 +26,7 @@ const int Ch_Offset = 1;
 
 // Flag to indicate the gantry was not moving and to record ADC and Phidget values. 
 bool gbl_accept_banks = false; //set FALSE
-bool single_point = true; // set to true for non-scans. This makes it accept everything! 
+bool single_point = false; // set to true for non-scans. This makes it accept everything! 
 int run_numb = 0;
 
 class ScanToTreeConverter: public TRootanaEventLoop {
@@ -95,7 +95,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   
   // V1730 waveforms
   // 9.Nov.2017 Let's try adding using channels 2,3,4, 5
-  double V1730_wave0[nPoints_max][num_v1730_max],  V1730_wave1[nPoints_max][num_v1730_max],  V1730_wave2[nPoints_max][num_v1730_max], V1730_wave3[nPoints_max][num_v1730_max], V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max];
+  double V1730_wave0[nPoints_max][num_v1730_max],V1730_wave1[nPoints_max][num_v1730_max], V1730_wave2[nPoints_max][num_v1730_max];
 
   // Add a timestamp for each event. TL 2022-02-25 
   double evt_timestamp[nPoints_max];
@@ -160,7 +160,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
     tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points][140]/D"); //think of eqn* // SIZE OF COLUMN MUST MATCH num_v1730_max OR ELSE BANDING ISSUES WILL OCCUR
-    //tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][400]/D"); //think of eqn*
+    tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][400]/D"); //think of eqn*
     tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points][140]/D"); //think of eqn*
     //tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][400]/D"); 
     //tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][400]/D");
@@ -293,6 +293,9 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
     std::cout << "Good TDC banks: " << ngoodTDCbanks << std::endl;;
     std::cout << "Bad  TDC banks: " << nbadTDCbanks << std::endl;;
+    if (single_point){
+      tree->Fill();
+    }
   }
 
   bool ProcessMidasEvent(TDataContainer& dataContainer){
@@ -381,9 +384,9 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
               //0-89 and 2-40 being moved back by 20
 
-              if(chan == 0) V1730_wave0[num_points-1][ib-timeStart] = measurements[i].GetSample(ib+69);
-              //if(chan == 1) V1730_wave1[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-timeStart); // -130 is the timeStart offset, meaning the reference signal window starts at the start of the digitizer readout
-              if(chan == 2) V1730_wave2[num_points-1][ib-timeStart] = measurements[i].GetSample(ib+20);
+              if(chan == 0) V1730_wave0[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
+              if(chan == 1) V1730_wave1[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
+              if(chan == 2) V1730_wave2[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
               //if(chan == 3) V1730_wave3[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
              // if(chan == 5) V1730_wave5[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
             }		             	      
