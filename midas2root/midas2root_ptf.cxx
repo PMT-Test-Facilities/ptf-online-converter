@@ -14,7 +14,10 @@
 #include <TTree.h>
 #include <TFile.h>
 
-const int nPoints_max = 6000; // 24000*100;
+
+constexpr bool single_point = true; // set to true for non-scans. This makes it accept everything! 
+constexpr int nPoints_max = single_point ? 1800*1600 : 6000; // if single_point, we do an hour. otherwise, like 4 seconds of data
+
 const int num_phidg_max = 10000;
 const int max_temp_sensor = 20;
 const int num_v1730_max = 140; // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
@@ -26,7 +29,6 @@ const int Ch_Offset = 1;
 
 // Flag to indicate the gantry was not moving and to record ADC and Phidget values. 
 bool gbl_accept_banks = false; //set FALSE
-bool single_point = false; // set to true for non-scans. This makes it accept everything! 
 int run_numb = 0;
 
 class ScanToTreeConverter: public TRootanaEventLoop {
