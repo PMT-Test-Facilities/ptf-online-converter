@@ -15,8 +15,8 @@
 #include <TFile.h>
 
 
-constexpr bool single_point = true; // set to true for non-scans. This makes it accept everything! 
-constexpr int nPoints_max = single_point ? 1800*1600 : 6000; // if single_point, we do an hour. otherwise, like 4 seconds of data
+constexpr bool single_point = false; // set to true for non-scans. This makes it accept everything! 
+constexpr int nPoints_max = single_point ? 1800*1600 : 12000; // if single_point, we do an hour. otherwise, like 4 seconds of data
 
 const int num_phidg_max = 10000;
 const int max_temp_sensor = 20;
@@ -98,6 +98,8 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   // V1730 waveforms
   // 9.Nov.2017 Let's try adding using channels 2,3,4, 5
   double V1730_wave0[nPoints_max][num_v1730_max],V1730_wave1[nPoints_max][num_v1730_max], V1730_wave2[nPoints_max][num_v1730_max];
+  double V1730_wave3[nPoints_max][num_v1730_max],V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max];
+
 
   // Add a timestamp for each event. TL 2022-02-25 
   double evt_timestamp[nPoints_max];
@@ -162,11 +164,11 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
     tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points][140]/D"); //think of eqn* // SIZE OF COLUMN MUST MATCH num_v1730_max OR ELSE BANDING ISSUES WILL OCCUR
-    tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][400]/D"); //think of eqn*
+    tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][140]/D"); //think of eqn*
     tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points][140]/D"); //think of eqn*
-    //tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][400]/D"); 
-    //tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][400]/D");
-    //tree->Branch("V1730_wave5",&V1730_wave5,"V1730_wave5[num_points][400]/D");
+    //tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][140]/D"); 
+    //tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][140]/D");
+    //tree->Branch("V1730_wave5",&V1730_wave5,"V1730_wave5[num_points][140]/D");
     //tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points]/D"); //think of eqn*
     //tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points]/D"); //think of eqn*
     //tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points]/D"); //think of eqn*
@@ -380,17 +382,18 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
             //std::cout <<measurements[i].GetNSamples() << " samples "<<std::endl; 
             
-            for(int ib = timeStart; ib < measurements[i].GetNSamples() && ib  < num_v1730_max + timeStart ; ib++){
+            for(int ib = 0; ib < measurements[i].GetNSamples() && ib  < num_v1730_max; ib++){
               
               //std::cout<<"ib = " <<ib <<std::endl;
 
               //0-89 and 2-40 being moved back by 20
 
-              if(chan == 0) V1730_wave0[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
-              if(chan == 1) V1730_wave1[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
-              if(chan == 2) V1730_wave2[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
-              //if(chan == 3) V1730_wave3[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
-             // if(chan == 5) V1730_wave5[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
+              if(chan == 0) V1730_wave0[num_points-1][ib] = measurements[i].GetSample(ib+timeStart);
+              if(chan == 1) V1730_wave1[num_points-1][ib] = measurements[i].GetSample(ib);
+              if(chan == 2) V1730_wave2[num_points-1][ib] = measurements[i].GetSample(ib+timeStart);
+              //if(chan == 3) V1730_wave3[num_points-1][ib] = measurements[i].GetSample(ib);
+              //if(chan == 4) V1730_wave4[num_points-1][ib] = measurements[i].GetSample(ib); 
+              //if(chan == 5) V1730_wave5[num_points-1][ib] = measurements[i].GetSample(ib); 
             }		             	      
           }
         }else{
