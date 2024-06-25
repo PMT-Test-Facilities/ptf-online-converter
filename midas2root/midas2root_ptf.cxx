@@ -20,8 +20,8 @@ constexpr int nPoints_max = single_point ? 1800*1600 : 12000; // if single_point
 
 const int num_phidg_max = 10000;
 const int max_temp_sensor = 20;
-const int num_v1730_max = 140; // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
-const int timeStart = 110; // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 400 samples.
+const int num_v1730_max = 70; // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
+const int timeStart = 180; // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 400 samples.
 
 // Offset for the ADC channel number
 const int Ch_Offset = 1;
@@ -163,12 +163,12 @@ class ScanToTreeConverter: public TRootanaEventLoop {
     tree->Branch("evt_timestamp",&evt_timestamp,"evt_timestamp[num_points]/D");
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
-    tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points][140]/D"); //think of eqn* // SIZE OF COLUMN MUST MATCH num_v1730_max OR ELSE BANDING ISSUES WILL OCCUR
-    tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][140]/D"); //think of eqn*
-    tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points][140]/D"); //think of eqn*
-    //tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][140]/D"); 
-    //tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][140]/D");
-    //tree->Branch("V1730_wave5",&V1730_wave5,"V1730_wave5[num_points][140]/D");
+    tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points][70]/D"); //think of eqn* // SIZE OF COLUMN MUST MATCH num_v1730_max OR ELSE BANDING ISSUES WILL OCCUR
+    tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][70]/D"); //think of eqn*
+    tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points][70]/D"); //think of eqn*
+    //tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][70]/D"); 
+    //tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][70]/D");
+    //tree->Branch("V1730_wave5",&V1730_wave5,"V1730_wave5[num_points][70]/D");
     //tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points]/D"); //think of eqn*
     //tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points]/D"); //think of eqn*
     //tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points]/D"); //think of eqn*
