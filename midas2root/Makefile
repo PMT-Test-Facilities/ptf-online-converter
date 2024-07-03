@@ -2,7 +2,7 @@
 # Example Makefile for ROOTANA-based projects
 #
 
-CXXFLAGS = -g -O2 -Wall -Wuninitialized
+CXXFLAGS = -O2 -Wall -Wuninitialized
 
 # required ZLIB library
 
@@ -45,7 +45,8 @@ endif # ROOTSYS
 
 ifdef MIDASSYS
 
-MIDASLIBS = $(MIDASSYS)/linux/lib/libmidas.a -lutil -lrt
+MIDASLIBS = $(MIDASSYS)/lib/libmidas.a -lutil -lrt
+#MIDASLIBS = $(MIDASSYS)/lib/libmidas.a
 CXXFLAGS += -DHAVE_MIDAS -DOS_LINUX -Dextname -I$(MIDASSYS)/include
 
 UNAME := $(shell uname)

@@ -14,20 +14,22 @@
 #include <TTree.h>
 #include <TFile.h>
 
-#define TRUE 1
-#define FALSE 0
 
-#define nPoints_max 6000 // John 2019-11-05 Reduced from 1000000
-#define num_phidg_max 10000
-#define max_temp_sensor 20
-#define num_v1730_max 70 // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
-#define timeStart 130 // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 70 samples.
+constexpr bool single_point = false; // set to true for non-scans. This makes it accept everything! 
+constexpr int nPoints_max = single_point ? 1800*1600 : 12000; // if single_point, we do an hour. otherwise, like 4 seconds of data
+
+const int num_phidg_max = 10000;
+const int max_temp_sensor = 20;
+const int num_v1730_max = 70; // IMPOTANT: IF THIS IS EVER CHANGED, ALSO CHANGE THE HARDCODED VALUES FOR WAVEFORM BRANCH WIDTHS AS WELL (see: "v1730 data")
+const int timeStart = 180; // defines start of PMT Pulse timing window, currently at the 130th sample of 200, with a window size of 400 samples.
 
 // Offset for the ADC channel number
-#define Ch_Offset 1
+const int Ch_Offset = 1;
+
 
 // Flag to indicate the gantry was not moving and to record ADC and Phidget values. 
-int gbl_accept_banks = TRUE; //set FALSE
+bool gbl_accept_banks = false; //set FALSE
+int run_numb = 0;
 
 class ScanToTreeConverter: public TRootanaEventLoop {
 
@@ -95,7 +97,9 @@ class ScanToTreeConverter: public TRootanaEventLoop {
   
   // V1730 waveforms
   // 9.Nov.2017 Let's try adding using channels 2,3,4, 5
-  double V1730_wave0[nPoints_max][num_v1730_max],  V1730_wave1[nPoints_max][num_v1730_max],  V1730_wave2[nPoints_max][num_v1730_max], V1730_wave3[nPoints_max][num_v1730_max], V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max];
+  double V1730_wave0[nPoints_max][num_v1730_max],V1730_wave1[nPoints_max][num_v1730_max], V1730_wave2[nPoints_max][num_v1730_max];
+  double V1730_wave3[nPoints_max][num_v1730_max],V1730_wave4[nPoints_max][num_v1730_max], V1730_wave5[nPoints_max][num_v1730_max];
+
 
   // Add a timestamp for each event. TL 2022-02-25 
   double evt_timestamp[nPoints_max];
@@ -118,6 +122,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
   public:
 
+
   ScanToTreeConverter() {
     UseBatchMode(); //necessary to switch off graphics, used in for example AnaDisplay
     nnn = 0;
@@ -125,140 +130,141 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
   virtual ~ScanToTreeConverter() {};
 
-  void BeginRun(int transition,int run,int time){
-    std::cout << "Custom: begin run " << run << std::endl;
+  void initialize_tree(){
+    std::cout << "Custom: begin run " << run_numb << std::endl;
+    OpenRootFile(run_numb);
     //setup ROOT branches
 
     //Add Canvas
     TCanvas *c1 = new TCanvas("c1","Canvas Example",200,10,600,480);
 
     tree = new TTree("scan_tree","Scan Tree");
-    tree->Branch("num_points",&num_points,"num_points/Int_t");
-    tree->Branch("num_points_dig0",&num_points_dig0,"num_points_dig0/Int_t");
-    tree->Branch("num_points_dig1",&num_points_dig1,"num_points_dig1/Int_t");    
+    tree->Branch("num_points",&num_points,"num_points/I");
+    tree->Branch("num_points_dig0",&num_points_dig0,"num_points_dig0/I");
+    tree->Branch("num_points_dig1",&num_points_dig1,"num_points_dig1/I");    
 
-    tree->Branch("timestamp",&timestamp,"timestamp/Double_t");        //real time used in sec
-    tree->Branch("gantry_event",&counter_gant,"gantry_event/Int_t"); //an event is a measurement at a point
-    tree->Branch("gantry_subevent",&subevent,"gantry_subevent/Int_t");
+    tree->Branch("timestamp",&timestamp,"timestamp/D");        //real time used in sec
+    tree->Branch("gantry_event",&counter_gant,"gantry_event/I"); //an event is a measurement at a point
+    tree->Branch("gantry_subevent",&subevent,"gantry_subevent/I");
 
-    tree->Branch("gantry0_x",&x0_pos,"gantry0_x/Double_t");
-    tree->Branch("gantry0_y",&y0_pos,"gantry0_y/Double_t");
-    tree->Branch("gantry0_z",&z0_pos,"gantry0_z/Double_t");
-    tree->Branch("gantry0_tilt",&tilt0_pos,"gantry0_tilt/Double_t");
-    tree->Branch("gantry0_rot",&rot0_pos,"gantry0_rot/Double_t");
-    //tree->Branch("phidg0_tilt",&tilt_phid0,"phidg0_tilt/Double_t");
+    tree->Branch("gantry0_x",&x0_pos,"gantry0_x/D");
+    tree->Branch("gantry0_y",&y0_pos,"gantry0_y/D");
+    tree->Branch("gantry0_z",&z0_pos,"gantry0_z/D");
+    tree->Branch("gantry0_tilt",&tilt0_pos,"gantry0_tilt/D");
+    tree->Branch("gantry0_rot",&rot0_pos,"gantry0_rot/D");
+    //tree->Branch("phidg0_tilt",&tilt_phid0,"phidg0_tilt/D");
 
   
-    tree->Branch("Start_time0",&Start_time0,"Start_time0[num_points_dig0]/Double_t");
-    tree->Branch("Start_time1",&Start_time1,"Start_time1[num_points_dig1]/Double_t");
-    tree->Branch("Window_width0",&Window_width0,"Window_width0[num_points_dig0]/Double_t");
-    tree->Branch("Window_width1",&Window_width1,"Window_width1[num_points_dig1]/Double_t");
+    tree->Branch("Start_time0",&Start_time0,"Start_time0[num_points_dig0]/D");
+    tree->Branch("Start_time1",&Start_time1,"Start_time1[num_points_dig1]/D");
+    tree->Branch("Window_width0",&Window_width0,"Window_width0[num_points_dig0]/D");
+    tree->Branch("Window_width1",&Window_width1,"Window_width1[num_points_dig1]/D");
 
-    tree->Branch("evt_timestamp",&evt_timestamp,"evt_timestamp[num_points]/Double_t");
+    tree->Branch("evt_timestamp",&evt_timestamp,"evt_timestamp[num_points]/D");
 
     // v1730 data  V1730_wave0[nPoints_max][num_v1730_max]
-    tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points][70]/Double_t"); //think of eqn* // SIZE OF COLUMN MUST MATCH num_v1730_max OR ELSE BANDING ISSUES WILL OCCUR
-    tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][70]/Double_t"); //think of eqn*
-    tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points][70]/Double_t"); //think of eqn*
-    tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][70]/Double_t"); 
-    tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][70]/Double_t");
-    tree->Branch("V1730_wave5",&V1730_wave5,"V1730_wave5[num_points][70]/Double_t");
-    //tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points]/Double_t"); //think of eqn*
-    //tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points]/Double_t"); //think of eqn*
-    //tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points]/Double_t"); //think of eqn*
-    //tree->Branch("ADC0_voltage",ADC0_voltage,"ADC0_voltage[num_points]/Int_t");
+    tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points][70]/D"); //think of eqn* // SIZE OF COLUMN MUST MATCH num_v1730_max OR ELSE BANDING ISSUES WILL OCCUR
+    tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points][70]/D"); //think of eqn*
+    tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points][70]/D"); //think of eqn*
+    //tree->Branch("V1730_wave3",&V1730_wave3,"V1730_wave3[num_points][70]/D"); 
+    //tree->Branch("V1730_wave4",&V1730_wave4,"V1730_wave4[num_points][70]/D");
+    //tree->Branch("V1730_wave5",&V1730_wave5,"V1730_wave5[num_points][70]/D");
+    //tree->Branch("V1730_wave0",&V1730_wave0,"V1730_wave0[num_points]/D"); //think of eqn*
+    //tree->Branch("V1730_wave1",&V1730_wave1,"V1730_wave1[num_points]/D"); //think of eqn*
+    //tree->Branch("V1730_wave2",&V1730_wave2,"V1730_wave2[num_points]/D"); //think of eqn*
+    //tree->Branch("ADC0_voltage",ADC0_voltage,"ADC0_voltage[num_points]/I");
 
-    tree->Branch("gantry1_x",&x1_pos,"gantry1_x/Double_t");
-    tree->Branch("gantry1_y",&y1_pos,"gantry1_y/Double_t");
-    tree->Branch("gantry1_z",&z1_pos,"gantry1_z/Double_t");
-    tree->Branch("gantry1_tilt",&tilt1_pos,"gantry1_tilt/Double_t");
-    tree->Branch("gantry1_rot",&rot1_pos,"gantry1_rot/Double_t");
-    //tree->Branch("phidg1_tilt",&tilt_phid1,"phidg1_tilt/Double_t");
+    tree->Branch("gantry1_x",&x1_pos,"gantry1_x/D");
+    tree->Branch("gantry1_y",&y1_pos,"gantry1_y/D");
+    tree->Branch("gantry1_z",&z1_pos,"gantry1_z/D");
+    tree->Branch("gantry1_tilt",&tilt1_pos,"gantry1_tilt/D");
+    tree->Branch("gantry1_rot",&rot1_pos,"gantry1_rot/D");
+    //tree->Branch("phidg1_tilt",&tilt_phid1,"phidg1_tilt/D");
 	
-	tree->Branch("num_ACC_points",&num_ACC_points,"num_ACC_points/Int_t");
-	tree->Branch("phidgACC_Ax",acc0_x0,"phidgACC_Ax[num_ACC_points]/Double_t");
-	tree->Branch("phidgACC_Ay",acc0_y0,"phidgACC_Ay[num_ACC_points]/Double_t");
-	 tree->Branch("phidgACC_Az",acc0_z0,"phidgACC_Az[num_ACC_points]/Double_t");
+	tree->Branch("num_ACC_points",&num_ACC_points,"num_ACC_points/I");
+	tree->Branch("phidgACC_Ax",acc0_x0,"phidgACC_Ax[num_ACC_points]/D");
+	tree->Branch("phidgACC_Ay",acc0_y0,"phidgACC_Ay[num_ACC_points]/D");
+	 tree->Branch("phidgACC_Az",acc0_z0,"phidgACC_Az[num_ACC_points]/D");
 	
 
     //field-related phidget measurements
-    tree->Branch("num_phidg0_points",&num_phidg0_points,"num_phidg0_points/Int_t");
-    tree->Branch("phidg0_Ax",acc_x0,"phidg0_Ax[num_phidg0_points]/Double_t");
-    tree->Branch("phidg0_Ay",acc_y0,"phidg0_Ay[num_phidg0_points]/Double_t");
-    tree->Branch("phidg0_Az",acc_z0,"phidg0_Az[num_phidg0_points]/Double_t");
-    tree->Branch("phidg0_Bx",x0_field,"phidg0_Bx[num_phidg0_points]/Double_t");
-    tree->Branch("phidg0_By",y0_field,"phidg0_By[num_phidg0_points]/Double_t");
-    tree->Branch("phidg0_Bz",z0_field,"phidg0_Bz[num_phidg0_points]/Double_t");
-    tree->Branch("phidg0_Btot",tot0_field,"phidg0_Btot[num_phidg0_points]/Double_t");
-    tree->Branch("phidg0_tilt",tilt_phid0,"phidg0_tilt[num_phidg0_points]/Double_t");
+    tree->Branch("num_phidg0_points",&num_phidg0_points,"num_phidg0_points/I");
+    tree->Branch("phidg0_Ax",acc_x0,"phidg0_Ax[num_phidg0_points]/D");
+    tree->Branch("phidg0_Ay",acc_y0,"phidg0_Ay[num_phidg0_points]/D");
+    tree->Branch("phidg0_Az",acc_z0,"phidg0_Az[num_phidg0_points]/D");
+    tree->Branch("phidg0_Bx",x0_field,"phidg0_Bx[num_phidg0_points]/D");
+    tree->Branch("phidg0_By",y0_field,"phidg0_By[num_phidg0_points]/D");
+    tree->Branch("phidg0_Bz",z0_field,"phidg0_Bz[num_phidg0_points]/D");
+    tree->Branch("phidg0_Btot",tot0_field,"phidg0_Btot[num_phidg0_points]/D");
+    tree->Branch("phidg0_tilt",tilt_phid0,"phidg0_tilt[num_phidg0_points]/D");
 
-    tree->Branch("num_phidg1_points",&num_phidg1_points,"num_phidg1_points/Int_t");
-    tree->Branch("phidg1_Ax",acc_x1,"phidg1_Ax[num_phidg1_points]/Double_t");
-    tree->Branch("phidg1_Ay",acc_y1,"phidg1_Ay[num_phidg1_points]/Double_t");
-    tree->Branch("phidg1_Az",acc_z1,"phidg1_Az[num_phidg1_points]/Double_t");
-    tree->Branch("phidg1_Bx",x1_field,"phidg1_Bx[num_phidg1_points]/Double_t");
-    tree->Branch("phidg1_By",y1_field,"phidg1_By[num_phidg1_points]/Double_t");
-    tree->Branch("phidg1_Bz",z1_field,"phidg1_Bz[num_phidg1_points]/Double_t");
-    tree->Branch("phidg1_Btot",tot1_field,"phidg1_Btot[num_phidg1_points]/Double_t");
-    tree->Branch("phidg1_tilt",tilt_phid1,"phidg1_tilt[num_phidg1_points]/Double_t");
+    tree->Branch("num_phidg1_points",&num_phidg1_points,"num_phidg1_points/I");
+    tree->Branch("phidg1_Ax",acc_x1,"phidg1_Ax[num_phidg1_points]/D");
+    tree->Branch("phidg1_Ay",acc_y1,"phidg1_Ay[num_phidg1_points]/D");
+    tree->Branch("phidg1_Az",acc_z1,"phidg1_Az[num_phidg1_points]/D");
+    tree->Branch("phidg1_Bx",x1_field,"phidg1_Bx[num_phidg1_points]/D");
+    tree->Branch("phidg1_By",y1_field,"phidg1_By[num_phidg1_points]/D");
+    tree->Branch("phidg1_Bz",z1_field,"phidg1_Bz[num_phidg1_points]/D");
+    tree->Branch("phidg1_Btot",tot1_field,"phidg1_Btot[num_phidg1_points]/D");
+    tree->Branch("phidg1_tilt",tilt_phid1,"phidg1_tilt[num_phidg1_points]/D");
 
-    tree->Branch("num_phidg3_points",&num_phidg3_points,"num_phidg3_points/Int_t");
-    tree->Branch("phidg3_Ax",acc_x3,"phidg3_Ax[num_phidg3_points]/Double_t");
-    tree->Branch("phidg3_Ay",acc_y3,"phidg3_Ay[num_phidg3_points]/Double_t");
-    tree->Branch("phidg3_Az",acc_z3,"phidg3_Az[num_phidg3_points]/Double_t");
-    tree->Branch("phidg3_Bx",x3_field,"phidg3_Bx[num_phidg3_points]/Double_t");
-    tree->Branch("phidg3_By",y3_field,"phidg3_By[num_phidg3_points]/Double_t");
-    tree->Branch("phidg3_Bz",z3_field,"phidg3_Bz[num_phidg3_points]/Double_t");
-    tree->Branch("phidg3_Btot",tot3_field,"phidg3_Btot[num_phidg3_points]/Double_t");
-    tree->Branch("phidg3_tilt",tilt_phid3,"phidg3_tilt[num_phidg3_points]/Double_t");
+    tree->Branch("num_phidg3_points",&num_phidg3_points,"num_phidg3_points/I");
+    tree->Branch("phidg3_Ax",acc_x3,"phidg3_Ax[num_phidg3_points]/D");
+    tree->Branch("phidg3_Ay",acc_y3,"phidg3_Ay[num_phidg3_points]/D");
+    tree->Branch("phidg3_Az",acc_z3,"phidg3_Az[num_phidg3_points]/D");
+    tree->Branch("phidg3_Bx",x3_field,"phidg3_Bx[num_phidg3_points]/D");
+    tree->Branch("phidg3_By",y3_field,"phidg3_By[num_phidg3_points]/D");
+    tree->Branch("phidg3_Bz",z3_field,"phidg3_Bz[num_phidg3_points]/D");
+    tree->Branch("phidg3_Btot",tot3_field,"phidg3_Btot[num_phidg3_points]/D");
+    tree->Branch("phidg3_tilt",tilt_phid3,"phidg3_tilt[num_phidg3_points]/D");
 
-    tree->Branch("num_phidg4_points",&num_phidg4_points,"num_phidg4_points/Int_t");
-    tree->Branch("phidg4_Ax",acc_x4,"phidg4_Ax[num_phidg4_points]/Double_t");
-    tree->Branch("phidg4_Ay",acc_y4,"phidg4_Ay[num_phidg4_points]/Double_t");
-    tree->Branch("phidg4_Az",acc_z4,"phidg4_Az[num_phidg4_points]/Double_t");
-    tree->Branch("phidg4_Bx",x4_field,"phidg4_Bx[num_phidg4_points]/Double_t");
-    tree->Branch("phidg4_By",y4_field,"phidg4_By[num_phidg4_points]/Double_t");
-    tree->Branch("phidg4_Bz",z4_field,"phidg4_Bz[num_phidg4_points]/Double_t");
-    tree->Branch("phidg4_Btot",tot4_field,"phidg4_Btot[num_phidg4_points]/Double_t");
-    tree->Branch("phidg4_tilt",tilt_phid4,"phidg4_tilt[num_phidg4_points]/Double_t");
+    tree->Branch("num_phidg4_points",&num_phidg4_points,"num_phidg4_points/I");
+    tree->Branch("phidg4_Ax",acc_x4,"phidg4_Ax[num_phidg4_points]/D");
+    tree->Branch("phidg4_Ay",acc_y4,"phidg4_Ay[num_phidg4_points]/D");
+    tree->Branch("phidg4_Az",acc_z4,"phidg4_Az[num_phidg4_points]/D");
+    tree->Branch("phidg4_Bx",x4_field,"phidg4_Bx[num_phidg4_points]/D");
+    tree->Branch("phidg4_By",y4_field,"phidg4_By[num_phidg4_points]/D");
+    tree->Branch("phidg4_Bz",z4_field,"phidg4_Bz[num_phidg4_points]/D");
+    tree->Branch("phidg4_Btot",tot4_field,"phidg4_Btot[num_phidg4_points]/D");
+    tree->Branch("phidg4_tilt",tilt_phid4,"phidg4_tilt[num_phidg4_points]/D");
 
-    tree->Branch("int_temp",&int_temp,"int_temp/Double_t");
-    tree->Branch("ext1_temp",&ext1_temp,"ext1_temp/Double_t");
-    tree->Branch("ext2_temp",&ext2_temp,"ext2_temp/Double_t");
-    tree->Branch("temperatures",temperatures,"temperatures[20]/Double_t");
+    tree->Branch("int_temp",&int_temp,"int_temp/D");
+    tree->Branch("ext1_temp",&ext1_temp,"ext1_temp/D");
+    tree->Branch("ext2_temp",&ext2_temp,"ext2_temp/D");
+    tree->Branch("temperatures",temperatures,"temperatures[20]/D");
 
     //Helmholtz Coil related 
-    tree->Branch("coil_event",&counter_mag,"coil_event/Int_t");
-    tree->Branch("I_coil1",&curr_coil1,"I_coil1/Double_t");
-    tree->Branch("I_coil2",&curr_coil2,"I_coil2/Double_t");
-    tree->Branch("I_coil3",&curr_coil3,"I_coil3/Double_t");
-    tree->Branch("I_coil4",&curr_coil4,"I_coil4/Double_t");
-    tree->Branch("I_coil5",&curr_coil5,"I_coil5/Double_t");
-    tree->Branch("I_coil6",&curr_coil6,"I_coil6/Double_t");
+    tree->Branch("coil_event",&counter_mag,"coil_event/I");
+    tree->Branch("I_coil1",&curr_coil1,"I_coil1/D");
+    tree->Branch("I_coil2",&curr_coil2,"I_coil2/D");
+    tree->Branch("I_coil3",&curr_coil3,"I_coil3/D");
+    tree->Branch("I_coil4",&curr_coil4,"I_coil4/D");
+    tree->Branch("I_coil5",&curr_coil5,"I_coil5/D");
+    tree->Branch("I_coil6",&curr_coil6,"I_coil6/D");
 
-    tree->Branch("U_coil1",&volt_coil1,"U_coil1/Double_t");
-    tree->Branch("U_coil2",&volt_coil2,"U_coil2/Double_t");
-    tree->Branch("U_coil3",&volt_coil3,"U_coil3/Double_t");
-    tree->Branch("U_coil4",&volt_coil4,"U_coil4/Double_t");
-    tree->Branch("U_coil5",&volt_coil5,"U_coil5/Double_t");
-    tree->Branch("U_coil6",&volt_coil6,"U_coil6/Double_t");
+    tree->Branch("U_coil1",&volt_coil1,"U_coil1/D");
+    tree->Branch("U_coil2",&volt_coil2,"U_coil2/D");
+    tree->Branch("U_coil3",&volt_coil3,"U_coil3/D");
+    tree->Branch("U_coil4",&volt_coil4,"U_coil4/D");
+    tree->Branch("U_coil5",&volt_coil5,"U_coil5/D");
+    tree->Branch("U_coil6",&volt_coil6,"U_coil6/D");
 
     //PMT voltage/current related
-    tree->Branch("I_HPD_enable",&curr_hpd_enable,"I_HPD_enable/Double_t");
-    tree->Branch("I_HPD_HV_control",&curr_hpd_hv_control,"I_HPD_HV_control/Double_t");
-    tree->Branch("I_HPD_LV_control",&curr_hpd_lv_control,"I_HPD_LV_control/Double_t");
-    tree->Branch("I_receiver0",&curr_receiver0,"I_receiver0/Double_t");
-    tree->Branch("I_receiver1",&curr_receiver1,"I_receiver1/Double_t");
-    tree->Branch("I_monitor0",&curr_monitor0,"I_monitor0/Double_t");
-    tree->Branch("I_monitor1",&curr_monitor1,"I_monitor1/Double_t");
+    tree->Branch("I_HPD_enable",&curr_hpd_enable,"I_HPD_enable/D");
+    tree->Branch("I_HPD_HV_control",&curr_hpd_hv_control,"I_HPD_HV_control/D");
+    tree->Branch("I_HPD_LV_control",&curr_hpd_lv_control,"I_HPD_LV_control/D");
+    tree->Branch("I_receiver0",&curr_receiver0,"I_receiver0/D");
+    tree->Branch("I_receiver1",&curr_receiver1,"I_receiver1/D");
+    tree->Branch("I_monitor0",&curr_monitor0,"I_monitor0/D");
+    tree->Branch("I_monitor1",&curr_monitor1,"I_monitor1/D");
 
-    tree->Branch("U_HPD_enable",&volt_hpd_enable,"U_HPD_enable/Double_t");
-    tree->Branch("U_HPD_HV_control",&volt_hpd_hv_control,"U_HPD_HV_control/Double_t");
-    tree->Branch("U_HPD_LV_control",&volt_hpd_lv_control,"U_HPD_LV_control/Double_t");
-    tree->Branch("U_receiver0",&volt_receiver0,"U_receiver0/Double_t");
-    tree->Branch("U_receiver1",&volt_receiver1,"U_receiver1/Double_t");
-    tree->Branch("U_monitor0",&volt_monitor0,"U_monitor0/Double_t");
-    tree->Branch("U_monitor1",&volt_monitor1,"U_monitor1/Double_t");
+    tree->Branch("U_HPD_enable",&volt_hpd_enable,"U_HPD_enable/D");
+    tree->Branch("U_HPD_HV_control",&volt_hpd_hv_control,"U_HPD_HV_control/D");
+    tree->Branch("U_HPD_LV_control",&volt_hpd_lv_control,"U_HPD_LV_control/D");
+    tree->Branch("U_receiver0",&volt_receiver0,"U_receiver0/D");
+    tree->Branch("U_receiver1",&volt_receiver1,"U_receiver1/D");
+    tree->Branch("U_monitor0",&volt_monitor0,"U_monitor0/D");
+    tree->Branch("U_monitor1",&volt_monitor1,"U_monitor1/D");
 
     //Histogram for waveform
     SampleWave0 = new TH1F("","",200, 300, 500);
@@ -291,20 +297,27 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
     std::cout << "Good TDC banks: " << ngoodTDCbanks << std::endl;;
     std::cout << "Bad  TDC banks: " << nbadTDCbanks << std::endl;;
+    if (single_point){
+      tree->Fill();
+    }
   }
 
   bool ProcessMidasEvent(TDataContainer& dataContainer){
+    if (!tree){
+      initialize_tree();
+    }
+    
     TGenericData *bank = dataContainer.GetEventData<TGenericData>("EOM");  // END OF MOVE = START of MEASUREMENT
     if(bank){
-      std::cout << "end " << std::endl;
-      gbl_accept_banks = TRUE;
+      gbl_accept_banks = true;
+      std::cout << "Finished move of gantry " << std::endl;
       return true;
     }
     bank = dataContainer.GetEventData<TGenericData>("BONM");               // BEGINNING OF NEXT MOVE = END of MEASUREMENT
     if(bank){
-	  timestamp=dataContainer.GetMidasData().GetTimeStamp();//this is where we fill the tree for the time
-      std::cout << "end of move" << std::endl;
+	    timestamp=dataContainer.GetMidasData().GetTimeStamp();//this is where we fill the tree for the time
       tree->Fill();
+     
       counter = 0;
       num_points = 0;
       num_points_dig0 = 0;
@@ -313,11 +326,12 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       num_phidg1_points = 0;
       num_phidg3_points = 0;
       num_phidg4_points = 0;
-	  num_ACC_points = 0;
-      gbl_accept_banks = FALSE;
+	    num_ACC_points = 0;
+      ngoodTDCbanks++;
+      gbl_accept_banks = false;
       return true;
     }
-    if(gbl_accept_banks){
+    if(gbl_accept_banks || single_point){
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //attempt at adding digitizer data
       //Set input parameters which correspond to ADC measurements
@@ -338,12 +352,14 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
           num_points++;
           
-	  evt_timestamp[num_points-1] = (double)dataContainer.GetMidasEvent().GetTimeStamp();
+	        evt_timestamp[num_points-1] = (double)dataContainer.GetMidasEvent().GetTimeStamp();
 
           //std::cout << "point# "<< num_points << std::endl;
           
           std::vector<RawChannelMeasurement> measurements = v1730_b->GetMeasurements();
-          
+
+	        bool pmt_hit = false;
+	  
           for(int i = 0; i < measurements.size(); i++){
             
             int chan = measurements[i].GetChannel();
@@ -351,30 +367,37 @@ class ScanToTreeConverter: public TRootanaEventLoop {
             if(chan < 0 || chan >5) continue; // 9.Nov.2017 updated for first 5 channels only
             //		  std::cout << "chan " << chan << std::endl;
             
-            // saves num_v1730_max (currently 70) bins around each pulse
+            // saves num_v1730_max (currently 400) bins around each pulse
             // laser pulse is given an offset as it occurs earlier in time
             // Note: 1 ib  = 2 ns
             // This is what writes Midas data to the ROOT tree
             
             // Channel    Output
             // 0          Primary PMT wave
-            // 1          Reference Wave
+            // 1          clock signal
             // 2          Gantry0 receiver PMT
             // 3          Gantry0 monitor PMT
             // 4          Gantry1 receiver PMT
             // 5          Gantry1 monitor PMT
+
+            //std::cout <<measurements[i].GetNSamples() << " samples "<<std::endl; 
             
-            for(int ib = timeStart; ib < measurements[i].GetNSamples() && ib  < num_v1730_max + timeStart ; ib++){
+            for(int ib = 0; ib < measurements[i].GetNSamples() && ib  < num_v1730_max; ib++){
               
               //std::cout<<"ib = " <<ib <<std::endl;
-              
-              if(chan == 0) V1730_wave0[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);  
-              if(chan == 1) V1730_wave1[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-timeStart); // -130 is the timeStart offset, meaning the reference signal window starts at the start of the digitizer readout
-              // if(chan == 2) V1730_wave2[num_points-1][ib-timeStart] = measurements[i].GetSample(ib);
-              if(chan == 3) V1730_wave3[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
-              if(chan == 5) V1730_wave5[num_points-1][ib-timeStart] = measurements[i].GetSample(ib-60); 
+
+              //0-89 and 2-40 being moved back by 20
+
+              if(chan == 0) V1730_wave0[num_points-1][ib] = measurements[i].GetSample(ib+timeStart);
+              if(chan == 1) V1730_wave1[num_points-1][ib] = measurements[i].GetSample(ib);
+              if(chan == 2) V1730_wave2[num_points-1][ib] = measurements[i].GetSample(ib+timeStart);
+              //if(chan == 3) V1730_wave3[num_points-1][ib] = measurements[i].GetSample(ib);
+              //if(chan == 4) V1730_wave4[num_points-1][ib] = measurements[i].GetSample(ib); 
+              //if(chan == 5) V1730_wave5[num_points-1][ib] = measurements[i].GetSample(ib); 
             }		             	      
           }
+        }else{
+          std::cout << "Too many points! "<< num_points << std::endl;
         }
         return true;
       }
@@ -455,11 +478,11 @@ class ScanToTreeConverter: public TRootanaEventLoop {
       // Check for environment temperature monitoring data
       TGenericData *envt = dataContainer.GetEventData<TGenericData>("ENVT");
       if(envt){
-	  int_temp = ((float*)envt->GetData64())[0];
-	  ext1_temp = ((float*)envt->GetData64())[1];
-	  ext2_temp = ((float*)envt->GetData64())[2];
+          int_temp = ((float*)envt->GetData64())[0];
+          ext1_temp = ((float*)envt->GetData64())[1];
+          ext2_temp = ((float*)envt->GetData64())[2];
 
-	  temperatures[0] = ((float*)envt->GetData64())[0];
+          temperatures[0] = ((float*)envt->GetData64())[0];
           temperatures[1] = ((float*)envt->GetData64())[1];
           temperatures[2] = ((float*)envt->GetData64())[2];
       }
@@ -482,7 +505,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
         time = ((double*)bank_cyc->GetData64())[11];
 
-        std::cout << counter_gant << " " 
+        if(0)std::cout << counter_gant << " " 
           << time << " " << ((double*)bank_cyc->GetData64())[11] 
           << std::endl;
 
@@ -533,6 +556,12 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
       }
     }
+
+    TV1730RawData *v1730_b = dataContainer.GetEventData<TV1730RawData>("V1730");
+    if (v1730_b){
+      std::cout <<"okay there's a v1730 bank"<<std::endl;
+    }
+    nbadTDCbanks++;
     return true;
   }
 
@@ -558,8 +587,39 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 int main(int argc, char *argv[])
 {
 
-  ScanToTreeConverter::CreateSingleton<ScanToTreeConverter>();
-  return ScanToTreeConverter::Get().ExecuteLoop(argc, argv);
+  errno = -1;
+  char* endptf;
+  int x = strtol(argv[2], &endptf, 10);
+  if (endptf == argv[2]) {
+    std::cerr << "Invalid number: " << argv[2] << '\n';
+  } else if (*endptf) {
+    std::cerr << "Trailing characters after number: " << argv[2] << '\n';
+  } else if (errno == ERANGE) {
+    std::cerr << "Number out of range: " << argv[2] << '\n';
+  }
 
+  run_numb = strtol(argv[3], &endptf, 10);
+  if (endptf == argv[2]) {
+    std::cerr << "Invalid run number: " << argv[2] << '\n';
+  } else if (*endptf) {
+    std::cerr << "Trailing characters after run number: " << argv[2] << '\n';
+  } else if (errno == ERANGE) {
+    std::cerr << "Number out of range: " << argv[2] << '\n';
+  }
+
+  if (x==0){
+    std::cout << "Not accepting"<<std::endl;
+    gbl_accept_banks = false;
+  }else if(x==1){
+    std::cout << "Accepting" << std::endl;
+    gbl_accept_banks = true;
+  }else{
+    std::cout <<"What do with '"<<x<<"'"<<std::endl;
+  }
+
+  ScanToTreeConverter::CreateSingleton<ScanToTreeConverter>();
+  ScanToTreeConverter::Get().ExecuteLoop(argc, argv);
+
+  return static_cast<int>(gbl_accept_banks);
 }
 

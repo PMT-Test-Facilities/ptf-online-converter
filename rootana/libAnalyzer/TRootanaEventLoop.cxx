@@ -307,8 +307,9 @@ int TRootanaEventLoop::ProcessMidasFile(TApplication*app,const char*fname)
   while (1)
     {
       TMidasEvent event;
-      if (!f.Read(&event))
-	break;
+      if (!f.Read(&event)){
+	      break;
+      }
       
       /// Treat the begin run and end run events differently.
       int eventId = event.GetEventId();
