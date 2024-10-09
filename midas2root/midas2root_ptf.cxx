@@ -388,9 +388,9 @@ class ScanToTreeConverter: public TRootanaEventLoop {
 
               //0-89 and 2-40 being moved back by 20
 
-              if(chan == 0) V1730_wave0[num_points-1][ib] = measurements[i].GetSample(ib+timeStart);
+              if(chan == 0) V1730_wave0[num_points-1][ib] = measurements[i].GetSample(ib+timeStart-30);
               if(chan == 1) V1730_wave1[num_points-1][ib] = measurements[i].GetSample(ib);
-              if(chan == 2) V1730_wave2[num_points-1][ib] = measurements[i].GetSample(ib+timeStart);
+              if(chan == 2) V1730_wave2[num_points-1][ib] = measurements[i].GetSample(ib+timeStart - 70);
               //if(chan == 3) V1730_wave3[num_points-1][ib] = measurements[i].GetSample(ib);
               //if(chan == 4) V1730_wave4[num_points-1][ib] = measurements[i].GetSample(ib); 
               //if(chan == 5) V1730_wave5[num_points-1][ib] = measurements[i].GetSample(ib); 
@@ -524,12 +524,14 @@ class ScanToTreeConverter: public TRootanaEventLoop {
         counter_mag = ((double*)bank_mag->GetData64())[0];
 
         //in feScan: filled from [1-80], [1-40] is current
-        curr_coil1 = ((double*)bank_mag->GetData64())[9];
-        curr_coil2 = ((double*)bank_mag->GetData64())[10];
-        curr_coil3 = ((double*)bank_mag->GetData64())[1];
-        curr_coil4 = ((double*)bank_mag->GetData64())[2];
-        curr_coil5 = ((double*)bank_mag->GetData64())[3];
-        curr_coil6 = ((double*)bank_mag->GetData64())[4];
+        curr_coil1 = ((double*)bank_mag->GetData64())[1];
+        curr_coil2 = ((double*)bank_mag->GetData64())[2];
+        curr_coil3 = ((double*)bank_mag->GetData64())[3];
+        curr_coil4 = ((double*)bank_mag->GetData64())[4];
+        curr_coil5 = ((double*)bank_mag->GetData64())[5];
+        curr_coil6 = ((double*)bank_mag->GetData64())[6];
+        
+        /*
         curr_hpd_enable = ((double*)bank_mag->GetData64())[5];
         curr_hpd_hv_control = ((double*)bank_mag->GetData64())[6];
         curr_hpd_lv_control = ((double*)bank_mag->GetData64())[7];
@@ -537,15 +539,16 @@ class ScanToTreeConverter: public TRootanaEventLoop {
         curr_monitor0 = ((double*)bank_mag->GetData64())[34];
         curr_receiver1 = ((double*)bank_mag->GetData64())[35];
         curr_monitor1 = ((double*)bank_mag->GetData64())[36];
+        */
 
+        volt_coil1 = ((double*)bank_mag->GetData64())[7];
+        volt_coil2 = ((double*)bank_mag->GetData64())[8];
+        volt_coil3 = ((double*)bank_mag->GetData64())[9];
+        volt_coil4 = ((double*)bank_mag->GetData64())[10];
+        volt_coil5 = ((double*)bank_mag->GetData64())[11];
+        volt_coil6 = ((double*)bank_mag->GetData64())[12];
 
-        volt_coil1 = ((double*)bank_mag->GetData64())[49];
-        volt_coil2 = ((double*)bank_mag->GetData64())[50];
-        volt_coil3 = ((double*)bank_mag->GetData64())[41];
-        volt_coil4 = ((double*)bank_mag->GetData64())[42];
-        volt_coil5 = ((double*)bank_mag->GetData64())[43];
-        volt_coil6 = ((double*)bank_mag->GetData64())[44];
-
+        /*
         volt_hpd_enable = ((double*)bank_mag->GetData64())[45];
         volt_hpd_hv_control = ((double*)bank_mag->GetData64())[46];
         volt_hpd_lv_control = ((double*)bank_mag->GetData64())[47];
@@ -553,6 +556,7 @@ class ScanToTreeConverter: public TRootanaEventLoop {
         volt_monitor0 = ((double*)bank_mag->GetData64())[74];
         volt_receiver1 = ((double*)bank_mag->GetData64())[75];
         volt_monitor1 = ((double*)bank_mag->GetData64())[76];
+        */
 
       }
     }
